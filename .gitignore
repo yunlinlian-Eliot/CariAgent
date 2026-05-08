@@ -1,0 +1,12 @@
+# 忽略 Python 运行产生的缓存
+__pycache__/
+*.py[cod]
+
+# 忽略本地数据库文件 (不传到网上)
+data/db/
+
+# 忽略存放 API Key 的隐私文件
+.env
+
+# 忽略 VS Code 的本地设置
+.vscode/
