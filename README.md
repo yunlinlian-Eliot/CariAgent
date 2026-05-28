@@ -57,43 +57,6 @@ cari_agent_prd_v_0_2.md
 cari_agent_rag_development_log.md
 workflow_design_notes.md
 ```
-
----
-
-## 运行
-
-安装依赖：
-
-```powershell
-D:/Python313/python.exe -m pip install -r requirements.txt
-```
-
-配置 API key：
-
-```powershell
-$env:OPENAI_API_KEY="你的_api_key"
-```
-
-运行：
-
-```powershell
-D:/Python313/python.exe core/simple_mvp.py
-```
-
-启动 Streamlit 网页 demo：
-
-```powershell
-D:/Python313/python.exe -m streamlit run ui/app.py
-```
-
-浏览器打开：
-
-```text
-http://localhost:8501
-```
-
----
-
 ## 模型配置
 
 默认模型在 `core/simple_mvp.py` 中通过环境变量控制：
