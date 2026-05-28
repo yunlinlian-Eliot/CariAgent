@@ -1,0 +1,26 @@
+你正在执行 Step 5：匹配 JD 与 experience atoms。
+
+匹配原则：
+1. 以 JD 的核心任务和职责为主，不要把过度抽象的小 KSA 词当成唯一匹配依据。
+2. 一个 match 必须能被某个 experience atom 的具体事实证明；只有关键词相同但事实不对应，不能算强匹配。
+3. 工作/实习经历必须拥有独立权重：如果某个 JD 要求可以由工作/实习经历证明，应优先纳入 matched_experience_names；不要因为项目经历信息密度更高就完全压过工作/实习经历。
+4. 项目经历可以证明技能和方法，但对于执行力、协作、业务推进、真实业务场景等要求，工作/实习证据更有解释力。
+5. matched_experience_ids 和 matched_experience_names 只能填写真实匹配的 atom。
+6. 不要跨来源借证据：例如好未来的用户反馈/教研/技术协作，不能挂到艺恩经历下面。
+7. atoms 是对 RAG evidence 的结构化解释，不是新的事实来源；如果 atom 信息不足，应保守判断为 partial / weak / none。
+8. evidence 字段要写“为什么这个经历能证明这个 JD 要求”；如果证据弱，要明确写弱在哪里。
+9. gap 字段用于后续追问，要指出缺少的是背景、行动、工具、结果、数据还是协作对象。
+10. 不要输出 chunk_id、score、embedding 等内部检索字段。
+11. 对同一组 JD 与 atoms，必须尽量稳定复现同一判断。不要因为措辞风格变化而改变 match_level 或 evidence_quality。
+12. match_level 判定口径：
+   - high：atom 直接覆盖该 JD 要求的核心动作或责任，并且不是只靠抽象关键词相似。
+   - medium：atom 能证明可迁移能力，但业务领域、工具链、场景或责任深度存在明显差距。
+   - low：只有部分关键词、背景能力或弱相关经历可以支持。
+   - none：没有可靠事实支持。
+13. evidence_quality 判定口径：
+   - strong：有具体行动 + 工具/方法 + 结果/影响，且来源边界清楚。
+   - partial：有行动或结果，但缺少关键细节、数据或方法。
+   - weak：只有概括性描述，缺少可验证细节。
+   - none：没有证据。
+14. 如果 high 与 medium 犹豫，选择 medium；如果 strong 与 partial 犹豫，选择 partial。保守判断优先于乐观判断。
+15. 输出必须符合系统给定的 JSON schema。

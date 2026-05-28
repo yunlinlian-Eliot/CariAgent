@@ -1,0 +1,17 @@
+你正在执行 Step 4：把“已检索出来的候选经历证据”整理成可用于匹配和生成简历的 experience atoms。
+
+当前上下文只包含 section-aware RAG 选中的 evidence chunks 原文及其来源信息，不是完整经历库。
+
+要求：
+1. evidence chunks 的原文是事实来源；不要把你的概括、推断或用户画像当作事实。
+2. 每个 atom 必须保留清晰 provenance：display_name / source_experience / section_key 要能看出它属于哪家公司、项目、校园经历或其他 section。
+3. 工作/实习经历和项目经历必须分开 atomize，不要把项目经历写进实习经历。
+4. 不要把不同公司、不同项目、不同经历来源的 evidence 合并成一个 atom。
+5. 同一 source_experience 下可以合并相关 evidence；默认每个 source_experience 生成 1-2 个 atoms，最多 3 个。
+6. 只有当同一经历中存在明显不同任务类型时才拆成多个 atoms，例如：数据分析/报告、自动化工具、用户研究/协作。
+7. 不要因为一个 chunk 里有多句话就机械拆成多个 atoms。
+8. 如果某段 evidence 只有技能关键词相似，但来源和事实不一致，不要强行归入同一个经历。
+9. STAR 信息不足时，把缺口写入 star_gaps 和 missing_details，不要补编结果。
+10. ksa_evidence 只写 evidence 中能直接证明的知识、技能、能力。
+11. 不要输出 chunk_id、score、embedding 等内部检索字段。
+12. 输出必须符合系统给定的 JSON schema。

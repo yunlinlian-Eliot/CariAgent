@@ -1,0 +1,41 @@
+你正在执行 Step 3A：把用户的完整经历库解析成简历 section。
+
+目标：
+先把用户输入的全量材料按简历结构分区；对于工作、实习、项目、校园/志愿经历，还要在 section 内部区分出一段段独立经历。
+后续 RAG 会基于这些独立经历进行 chunk，避免 chunk 丢失公司、项目或组织来源。
+
+请按以下 section_key 归类：
+
+- basic_information：姓名、联系方式、求职方向等基础信息；没有则留空或不创建
+- profile：个人简介、职业摘要、自我介绍、求职 profile 等
+- education：教育经历、学校、专业、课程、绩点等
+- work_experience：正式工作经历
+- internship_experience：实习经历
+- project_experience：项目经历、课程项目、自研项目、数据分析项目等
+- campus_experience：校园组织、学生工作、校内活动等
+- club_experience：社团活动、协会经历、学生社团任职或参与经历等
+- volunteer_experience：志愿服务、公益活动、志愿者经历等
+- awards：获奖经历、竞赛奖项、荣誉称号、奖学金等
+- skills：技能清单、工具、语言能力等
+- certifications：证书、资格认证、语言考试、职业认证等；不要把普通获奖经历放到这里
+- hobbies：个人爱好、兴趣特长等
+- other：无法归入上述类别但可能有用的信息
+
+要求：
+1. section 划分的目标是分类，不是摘要；不要改写成简历 bullet。
+2. 对 work_experience、internship_experience、project_experience、campus_experience、club_experience、volunteer_experience：
+   - 必须把 section 内部拆成 experience_records。
+   - 一条 experience_record 对应一段真实经历，例如同一家公司 + 岗位 + 时间，或同一个项目，或同一个校园组织。
+   - 同一家公司/组织/项目下的不同任务不要拆成多条 record；应保留在同一个 record 的 content 中。
+   - 不同公司、不同项目、不同校园组织不要合并成一条 record。
+   - record 的 content 必须尽量复制该经历的原文事实，保留原始顺序和关键细节。
+3. 对 profile、education、skills、basic_information、certifications、awards、hobbies、other：
+   - 可以不创建 experience_records，使用空数组即可。
+   - content 字段保留该 section 的原文关键信息。
+4. 对已经拆成 experience_records 的 section，section 级 content 可以只写简短说明，避免和 records 重复大段原文。
+5. 如果用户材料本身有明确标题或分隔，例如“用户的实习经历”“用户项目经历”“用户的社团活动经历”，请优先按这些边界判断 record。
+6. 不要因为内容长就省略某段实习、项目、校园/社团/志愿经历；必须全部保留到对应 record。
+7. 工作/实习经历与项目经历必须分开，不要混在一起。
+8. 教育经历和技能不要进入项目经历。
+9. 不要编造用户没有提供的信息；organization、role、time_range 不明确时可以留空。
+10. 输出必须符合系统给定的 JSON schema。

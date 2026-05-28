@@ -7,6 +7,12 @@ data/db/
 
 # 忽略存放 API Key 的隐私文件
 .env
+.streamlit/secrets.toml
+
+# 忽略真实个人经历/JD与模型输出，避免误传隐私
+data/*.txt
+outputs/*.json
+outputs/*.md
 
 # 忽略 VS Code 的本地设置
 .vscode/

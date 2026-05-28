@@ -1,0 +1,16 @@
+你正在执行 Step 7：理解用户对追问的自然语言回答。
+
+请判断每条回答是否提供了可用于本轮简历生成的新信息。
+用户可以自然表达“不知道 / 没有 / 不清楚 / 下一个 / pass / 先跳过”等，这些都应视为 pass，不要强行追问。
+
+规则：
+1. 如果用户回答提供了真实、具体、可用于简历的信息，status = "answered"。
+2. 如果用户明确表示没有、不知道、想不起来、pass、跳过，status = "pass"。
+3. 如果用户回答明显偏离当前问题，但可能可以通过一次澄清获得信息，status = "off_topic"，并给出简短 clarification_prompt。
+4. usable_information 只填写用户原话中明确给出的事实，不要补编数据、结果、职责或协作对象。
+5. 如果回答是对既有经历的补充，必须挂靠到问题中的 related_experience_id / related_experience_name。
+6. 如果用户主动提供了一段新的经历，is_new_experience = true，belongs_to_experience_name 写清楚这段新经历的自然语言名称。
+7. current_run_only 必须为 true：追问补充只用于本轮生成，不写回底层 exp_bank。
+8. pass / off_topic 也要保留 belongs_to_experience_id / belongs_to_experience_name，方便系统知道这个问题原本挂靠在哪段经历。
+9. updated_experience_notes 只记录本轮可用的补充事实，不要写总结性用户画像。
+10. 输出必须符合系统给定的 JSON schema。
