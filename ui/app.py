@@ -63,6 +63,14 @@ st.markdown(
         background: transparent;
         height: 2.75rem !important;
     }
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stDeployButton"],
+    div[data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
     header[data-testid="stHeader"] button,
     div[data-testid="collapsedControl"],
     div[data-testid="stSidebarCollapsedControl"] {
@@ -549,21 +557,6 @@ DEMO_JD = """数据分析实习生
 @st.cache_data(show_spinner=False)
 def load_default_inputs() -> tuple[str, str]:
     return DEMO_EXPERIENCE.strip(), DEMO_JD.strip()
-
-
-def clear_history_records() -> int:
-    outputs = PROJECT_ROOT / "outputs"
-    if not outputs.exists():
-        return 0
-    deleted = 0
-    for item in outputs.iterdir():
-        if item.is_file():
-            try:
-                item.unlink()
-                deleted += 1
-            except OSError:
-                continue
-    return deleted
 
 
 def reset_demo_session_inputs() -> None:
@@ -1568,10 +1561,9 @@ def main() -> None:
         display_sidebar_experience_bank()
     with st.sidebar.expander("历史运行", expanded=False):
         display_last_run()
-        if st.button("清空历史记录并重置演示数据", use_container_width=True):
-            deleted = clear_history_records()
+        if st.button("重置当前会话", use_container_width=True):
             reset_demo_session_inputs()
-            st.session_state.history_clear_message = f"已清空 {deleted} 个历史文件，并恢复虚拟测试用例。"
+            st.session_state.history_clear_message = "已重置当前会话，并恢复虚拟测试用例。本地 outputs 文件不会被删除。"
             st.rerun()
     if st.session_state.get("history_clear_message"):
         st.sidebar.success(st.session_state.history_clear_message)
