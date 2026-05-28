@@ -60,31 +60,8 @@ st.markdown(
     header[data-testid="stHeader"] {
         display: block !important;
         visibility: visible !important;
-        background: transparent;
+        background: rgba(247, 249, 252, .96);
         height: 2.75rem !important;
-    }
-    div[data-testid="stToolbar"],
-    div[data-testid="stDecoration"],
-    div[data-testid="stDeployButton"],
-    div[data-testid="stStatusWidget"] {
-        display: none !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-    }
-    header[data-testid="stHeader"] button,
-    div[data-testid="collapsedControl"],
-    div[data-testid="stSidebarCollapsedControl"] {
-        display: inline-flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        z-index: 999999 !important;
-    }
-    div[data-testid="collapsedControl"],
-    div[data-testid="stSidebarCollapsedControl"] {
-        position: fixed !important;
-        top: .55rem !important;
-        left: .55rem !important;
     }
     .stApp {
         background: var(--ca-bg);
