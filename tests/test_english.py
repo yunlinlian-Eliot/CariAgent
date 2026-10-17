@@ -7,12 +7,12 @@ import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-CJK = re.compile(r'[\u4e00-\u9fff]')
+CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
 class EnglishEditionTests(unittest.TestCase):
     def test_english_workflow_strings_and_prompts_in_isolated_process(self):
-        script = '''
+        script = """
 import sys, re
 sys.path.insert(0, 'core')
 import simple_mvp as m
@@ -29,13 +29,19 @@ for names in [[], ['Example employer']]:
     assert not re.search('[\\u4e00-\\u9fff]', str(plan)), plan
 assert not re.search('[\\u4e00-\\u9fff]', str(retrieval.chunk_text('Built SQL dashboards for an employer.')[0].to_dict()))
 assert not re.search('[\\u4e00-\\u9fff]', m.default_fit_summary({'fit_level':'good_fit'}))
-'''
-        result = subprocess.run([sys.executable, '-c', script], cwd=ROOT, env={**os.environ, 'CARIAGENT_LANGUAGE':'en'}, capture_output=True, text=True)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=ROOT,
+            env={**os.environ, "CARIAGENT_LANGUAGE": "en"},
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_all_english_pages_navigation_and_missing_key_error(self):
-        # Keep process language changes out of the Chinese regression suite.
-        script = '''
+        # Run application checks in an isolated process.
+        script = """
 from streamlit.testing.v1 import AppTest
 import re, os
 os.environ.pop('OPENAI_API_KEY', None)
@@ -60,10 +66,16 @@ at.run(timeout=30)
 next(b for b in at.button if b.label == 'Analyze JD').click().run(timeout=30)
 check()
 assert any('OPENAI_API_KEY' in e.value for e in at.error), list(at.error)
-'''
-        result = subprocess.run([sys.executable, '-c', script], cwd=ROOT, env={**os.environ, 'CARIAGENT_LANGUAGE':'en'}, capture_output=True, text=True)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=ROOT,
+            env={**os.environ, "CARIAGENT_LANGUAGE": "en"},
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

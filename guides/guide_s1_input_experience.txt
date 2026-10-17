@@ -1,52 +1,51 @@
-你正在准备 CariAgent 的 Step 1：输入个人经历库。
+Step 1: Input Personal Experience Database for CariAgent
 
-请先确保基础资料完整，再尽量把经历写得具体。
+Please first ensure that your basic information is complete and then try to describe your experiences in detail.
 
-请先直接补齐这些基础资料：
-1. 姓名
-2. 联系方式
-3. 学校
-4. 学历
-5. 专业
-6. 毕业时间 / 在读状态
-7. 工作或实习年限
-8. 目标求职方向
+Basic Information to Complete:
+1. Name
+2. Contact Information
+3. School
+4. Degree Level
+5. Major
+6. Graduation Date / Current Enrollment Status
+7. Years of Work or Internship Experience
+8. Target Employment Direction
 
-这些属于基础信息，请尽量一次写完整，不要留到后续追问阶段。
+These are foundational details; please provide them as fully as possible in one go to avoid repeated follow-ups.
 
-对于经历内容，不需要一开始就写得完美。
-你可以按“公司 / 组织 + 角色 + 时间 + 具体任务”的方式整理。
+For Experience Entries, you do not need to make them perfect at the start. You can organize them based on the format: “Company / Organization + Role + Time + Specific Tasks.”
 
-建议包含的信息：
-1. 公司或组织名称
-2. 你的角色
-3. 时间
-4. 做过的项目或任务
-5. 你采取了哪些行动
-6. 用过哪些工具
-7. 产生了什么结果
-8. 如果有，补充数据规模、效率提升、业务影响、合作对象
+Recommended Information to Include:
+1. Company or Organization Name
+2. Your Role
+3. Time Period
+4. Projects or Tasks Undertaken
+5. Actions You Took
+6. Tools Used
+7. Results Achieved
+8. If available, add data scale, efficiency improvements, business impact, or collaborators involved
 
-你可以参考这个格式：
+Example Format:
 
-公司 / 组织：
-角色：
-时间：
-项目 / 任务：
-行动：
-工具：
-结果：
-补充说明：
+Company / Organization:
+Role:
+Time:
+Project / Task:
+Actions Taken:
+Tools Used:
+Results:
+Additional Notes:
 
-对于“项目经历”，可以宽泛理解：
-- 比赛
-- 论文
-- 科研
-- 合作项目
-- 个人产品
-- 或任何能体现你从背景、目标、行动到结果的完整逻辑链条的事情
+Regarding “Project Experience,” you can interpret this broadly to include:
+- Competitions
+- Academic Papers
+- Research
+- Collaborative Projects
+- Personal Products
+- Or any experience that reflects a complete logical chain from background, goals, actions to results
 
-说明：
-1. 你也可以直接用自然语言写，不必完全照抄模板。
-2. 如果某些细节暂时想不起来，可以先留空，后续 CariAgent 会再追问。
-3. 不要为了“写得好看”而编造事实，先把真实材料尽量放进来。
+Notes:
+1. You may also write in natural language rather than strictly following the template.
+2. If certain details cannot be recalled at the moment, leave them blank; CariAgent will follow up later.
+3. Do not fabricate information for the sake of sounding better; focus on including as much truthful material as possible first.

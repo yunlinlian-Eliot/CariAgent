@@ -1,10 +1,11 @@
-"""Process-level language selection for separately deployed app editions."""
-import os
+"""Compatibility helpers for the English-only branch."""
 
 
 def is_english() -> bool:
-    return os.getenv('CARIAGENT_LANGUAGE', 'zh').lower() == 'en'
+    """Both application entry points in this branch use English."""
+    return True
 
 
-def localized(chinese: str, english: str) -> str:
-    return english if is_english() else chinese
+def localized(source: str, english: str) -> str:
+    """Return English text for callers using the earlier localization API."""
+    return english

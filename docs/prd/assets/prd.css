@@ -1,6 +1,6 @@
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
-body { font-family: 'Noto Sans CJK SC','Microsoft YaHei',sans-serif; color:#20323d; font-size:14px; line-height:1.8; max-width:1040px; padding:48px; margin:auto; }
+body { font-family: 'Noto Sans','Arial',sans-serif; color:#20323d; font-size:14px; line-height:1.8; max-width:1040px; padding:48px; margin:auto; }
 h1 { font-size:25px; color:#0a6379; line-height:1.5; margin-top:1.7em; }
 h2 { font-size:19px; color:#254e5c; line-height:1.5; margin-top:1.5em; }
 h3 { font-size:16px; }
@@ -34,10 +34,8 @@ figcaption { text-align:center; color:#61727b; font-size:12px; }
  img {max-height:185mm; width:auto;}
  figure {break-inside:avoid; margin:12px 0;}
  nav#TOC {break-after:page; font-size:10px;}
- #产品演进与关键技术决策 {break-before:page;}
 }
 figure svg { display:block; max-width:100%; margin:12px auto; }
 @media print {
  figure svg { height:175mm; width:auto; max-width:100%; }
- #产品演进与关键技术决策 {break-before:auto;}
 }

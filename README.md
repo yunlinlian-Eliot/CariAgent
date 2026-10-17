@@ -1,126 +1,83 @@
-# CariAgent
+# CariAgent — Evidence-Based Resume Tailoring
 
-CariAgent 是一个本地运行的 JD 驱动型简历重组 Agent。
+CariAgent helps job seekers turn a broad experience bank into a resume tailored to a specific job description. It retrieves relevant source evidence, identifies gaps, asks optional follow-up questions, and generates a resume without inventing facts or mixing achievements across experiences.
 
-核心目标：
+This branch is the **English edition**, intended for international users and recruiters. Application text, prompts, guides, product documentation, diagrams, and exported PRD files are in English. The Chinese edition is maintained separately on `main`.
 
-> 从用户经历库中召回能证明目标 JD 的真实证据，并生成更匹配岗位的简历草稿。
+## Product documentation
 
-当前项目用于作品集展示，重点是 RAG、workflow、追问机制和结构化 AI 产品设计。
+- **[Product Requirements Document](docs/prd/CariAgent_PRD_en_v0.4.md)** — product goals, user and system flows, functional requirements, AI behavior rules, development history, technical decisions, and validation evidence.
+- [PDF](docs/prd/exports/CariAgent_PRD_en_v0.4.pdf) · [Editable Word document](docs/prd/exports/CariAgent_PRD_en_v0.4.docx) · [Standalone HTML](docs/prd/exports/CariAgent_PRD_en_v0.4.html).
+- [Evidence coverage scoring](docs/scoring_v0_2.md).
+- [Experience bank guide](guides/guide_s1_input_experience.txt) · [Job description guide](guides/guide_s2_input_jd.txt).
 
----
+## How it works
 
-## 当前工作流
+1. Enter or upload an experience bank and a target job description.
+2. Parse the role requirements and organize experience into sections and records.
+3. Retrieve source chunks using section-aware semantic and keyword search.
+4. Structure evidence into STAR/KSA annotations, identify gaps, and calculate evidence coverage.
+5. Review the match summary and optionally answer or skip follow-up questions.
+6. Generate a resume and separate improvement suggestions. Markdown and Word downloads contain only the resume.
 
-```text
-1. 读取 exp_bank
-2. 读取 JD
-3. 拆解 JD
-4. 将经历库划分为 sections
-5. 按 section 做 RAG 检索
-6. 将 selected chunks 结构化为 experience atoms
-7. 匹配 JD 与 atoms
-8. 基于缺口生成追问
-9. 理解用户补充回答
-10. 生成 Markdown 简历草稿
-```
+Source text and user answers are facts; model annotations and scores are interpretations. Evidence coverage is **not a hiring probability**. The interface uses synthetic demonstration inputs; they are not claims about the project author's employment history.
 
----
+## Run locally
 
-## 核心原则
-
-- 原始经历、RAG selected chunks、用户追问回答是事实来源。
-- JD analysis、atoms、match result、score 是标注和判断，不是新的事实。
-- 每条证据必须保留 provenance，防止跨经历借证据。
-- Follow-up 只用于本轮生成，不写回底层 exp_bank。
-- 当前优先保留原始信息，不以极限 token 节省为目标。
-
----
-
-## 主要文件
-
-```text
-core/simple_mvp.py              主流程脚本
-core/retrieval.py               RAG 检索逻辑
-prompts/system_cariagent.txt    系统原则
-prompts/task_*.txt              各步骤 prompt
-data/exp_bank.txt               用户经历库
-data/sample_jd.txt              目标 JD
-outputs/*.json                  中间产物
-outputs/result.md               简历正文（不含优化建议）
-outputs/improvement_suggestions.md  独立优化建议
-```
-
-项目文档：
-
-```text
-cari_agent_prd_v_0_2.md
-cari_agent_rag_development_log.md
-workflow_design_notes.md
-```
-## 模型配置
-
-默认模型在 `core/simple_mvp.py` 中通过环境变量控制：
-
-```powershell
-$env:OPENAI_MODEL="gpt-4.1"
-```
-
-也可以按步骤覆盖：
-
-```powershell
-$env:OPENAI_MODEL_S3="gpt-4.1"
-$env:OPENAI_MODEL_S4="gpt-4.1"
-$env:OPENAI_MODEL_S8="gpt-4.1"
-```
-
----
-
-## 当前状态
-
-RAG 主逻辑已阶段性收束。
-当前已开始 workflow 重构：
-
-- `WorkflowState` 承接单次运行状态
-- 主流程已拆为可复用 workflow functions
-- CLI 入口仍保留：`python core/simple_mvp.py`
-- 每次运行会生成 `outputs/workflow_trace.md`
-
-下一阶段重点：
-
-1. 设计网页 API；
-2. 将 follow-up 改造成网页交互；
-3. 增加运行状态展示；
-4. 稳定 Step 8 输出格式；
-5. 再评估是否引入 LangGraph。
-
-网页生成结果将简历正文与优化建议分开展示，Markdown 和 Word 下载仅包含简历正文。CLI 默认分别保存上述两个文件；网页仍默认不将输出写入磁盘。
-
-## English edition
-
-The English app shares the retrieval, scoring and human-in-the-loop workflow with the Chinese edition. Its UI, synthetic demo inputs, local fallback messages, model instructions, follow-up questions, resume and improvement suggestions use English. Prompt files are in `prompts/en/`. Generated JSON keys and enums remain unchanged.
-
-Run the editions in separate processes (or separate Streamlit deployments):
+Python 3.12 was used for the current validation.
 
 ```bash
-# Chinese edition
-python -m streamlit run ui/app.py
-# English edition
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python -m streamlit run ui/app_en.py
 ```
 
-For a separate English deployment on Streamlit Community Cloud, select this repository and set the main file to `ui/app_en.py`. Keep the existing Chinese app pointed at `ui/app.py`. Configure `OPENAI_API_KEY` securely in each app's Streamlit Secrets; do not commit it. Deploying an entry point is a separate step from editing code. A second app receives its own URL.
+Configure `OPENAI_API_KEY` securely as an environment variable or in the ignored `.streamlit/secrets.toml` file:
 
-Offline checks:
+```toml
+OPENAI_API_KEY = "YOUR_API_KEY"
+```
+
+Do not commit credentials. The default generation model is `gpt-4.1-mini`; retrieval uses `text-embedding-3-small`. Generation models can be overridden through `OPENAI_MODEL` or step-specific variables such as `OPENAI_MODEL_S3`, `OPENAI_MODEL_S4`, and `OPENAI_MODEL_S8`.
+
+## Deploy on Streamlit Community Cloud
+
+Create an app using repository `yunlinlian-Eliot/CariAgent`, branch `english-app`, and entry point `ui/app_en.py`. Configure the API key in the deployed app's **Settings → Secrets**. The deployed app has its own secrets; credentials from a development environment are not automatically transferred.
+
+Both `ui/app.py` and `ui/app_en.py` run English on this branch. Keep any existing Chinese deployment connected to `main`. The existing Dev Container configuration is preserved.
+
+## Validate
+
+Offline tests:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-Opt-in live test (uses the configured API key and incurs API costs):
+Opt-in real API smoke test, using synthetic demo inputs and a simulated follow-up answer:
 
 ```bash
 python scripts/smoke_english.py --output-dir /tmp/cariagent-english-test
 ```
 
-This runs English JD analysis, real embeddings and retrieval, matching, local follow-up planning, model review of a simulated answer, and separate resume/advice generation. It rejects Chinese text in the synthetic English outputs. It does not replace human usability testing. Test artifacts are saved to the selected output directory, outside the checkout by default in the example above. User-provided source documents may contain their original names and quotations; English output instructions must not invent facts to translate them.
+The live test incurs API usage costs. It exercises JD analysis, real embeddings and retrieval, matching, answer review, and separate resume/advice generation. It does not replace human usability testing. The repository also checks English-only text and document exports.
+
+## Project structure
+
+```text
+core/                 Workflow state, model calls, retrieval, and scoring
+ui/                   Streamlit application and deployment entry point
+prompts/              English system and step prompts
+guides/               English input guidance
+docs/prd/             English PRD, diagrams, and PDF/Word/HTML exports
+docs/scoring_v0_2.md   Evidence coverage scoring specification
+scripts/              Opt-in live API validation
+tests/                Offline regression and English-only checks
+```
+
+## Scope and limitations
+
+This is a working AI product MVP with a function-based workflow, not a completed multi-agent framework migration. It has no account system, persistent vector database, cross-session recovery, or guaranteed production SLA. TXT, Markdown, DOCX, and text-based PDF inputs are supported; image understanding/OCR is not implemented. Web outputs are not written to disk by default (`CARIAGENT_SAVE_OUTPUTS=0`), but session state and caches may retain runtime data. User inputs are sent to the configured model and embedding services.
+
+The CLI remains available through `python core/simple_mvp.py`, requiring user-provided `data/exp_bank.txt` and `data/sample_jd.txt`. Its advanced follow-up controls differ from the web experience; see the PRD for the distinction.

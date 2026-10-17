@@ -1,8 +1,8 @@
-现在执行用户经历库质量检查。
+Now perform a user experience library quality check.
 
-请基于当前已检索出的候选经历材料与已拆解出的原子经历，判断这些候选材料是否足够支持当前 JD 的高质量简历生成。
+Based on the currently retrieved candidate experience materials and the already decomposed atomic experiences, determine whether these candidate materials are sufficient to support high-quality resume generation for the current JD.
 
-请严格返回下面这种 JSON 结构，不要输出额外解释：
+Strictly return the following JSON structure, without any additional explanation:
 {
   "overall_quality": "high / medium / low",
   "summary": "",
@@ -18,11 +18,11 @@
   "user_message": ""
 }
 
-规则：
-1. 先区分“基础必填信息”和“可挖掘经历信息”。
-2. 基础必填信息包括但不限于：姓名、联系方式、学校、学历、专业、毕业时间 / 在读状态、工作或实习年限、目标求职方向。
-3. 如果基础必填信息缺失，应在 common_gaps 中明确指出，但不要把它们视为后续 AI 深挖预算的优先对象。
-4. 对可挖掘经历信息，重点检查 STAR 是否完整，尤其是 Result。
-5. common_gaps 应总结用户材料里反复出现的问题，例如缺少结果、缺少工具、缺少数据规模、缺少协作对象。
-6. user_message 必须简洁、清晰，并引导用户以后输入更多真实、具体的信息。
-7. 当前材料可能只是从全量经历库中检索出的候选子集，因此请评估“对当前 JD 是否够用”，不要把未检索出的材料默认视为不存在。
+Rules:
+1. First distinguish between "basic required information" and "extractable experience information."
+2. Basic required information includes but is not limited to: name, contact information, school, education level, major, graduation date / enrollment status, years of work or internship, target job direction.
+3. If basic required information is missing, explicitly point this out in common_gaps, but do not treat them as priority AI deep-dive targets later.
+4. For extractable experience information, focus on whether the STAR elements are complete, especially the Result.
+5. common_gaps should summarize problems repeatedly appearing in user materials, such as missing results, missing tools, missing data scale, missing collaborators.
+6. user_message must be concise and clear, and guide the user to provide more authentic and specific information in future inputs.
+7. The current materials may be only a candidate subset retrieved from the full experience library, so please evaluate "whether it's sufficient for the current JD," do not assume materials not retrieved are nonexistent.

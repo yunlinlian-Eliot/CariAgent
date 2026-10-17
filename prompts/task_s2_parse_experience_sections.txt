@@ -1,41 +1,41 @@
-你正在执行 Step 3A：把用户的完整经历库解析成简历 section。
+You are performing Step 3A: parsing the user's complete experience repository into resume sections.
 
-目标：
-先把用户输入的全量材料按简历结构分区；对于工作、实习、项目、校园/志愿经历，还要在 section 内部区分出一段段独立经历。
-后续 RAG 会基于这些独立经历进行 chunk，避免 chunk 丢失公司、项目或组织来源。
+Goal:
+First, partition all the user's input materials according to the resume structure; for work, internship, project, campus/volunteer experiences, further distinguish the individual experience records within each section.
+Subsequent RAG will chunk based on these individual experience records to avoid chunks losing company, project, or organization sources.
 
-请按以下 section_key 归类：
+Please classify according to the following section_key:
 
-- basic_information：姓名、联系方式、求职方向等基础信息；没有则留空或不创建
-- profile：个人简介、职业摘要、自我介绍、求职 profile 等
-- education：教育经历、学校、专业、课程、绩点等
-- work_experience：正式工作经历
-- internship_experience：实习经历
-- project_experience：项目经历、课程项目、自研项目、数据分析项目等
-- campus_experience：校园组织、学生工作、校内活动等
-- club_experience：社团活动、协会经历、学生社团任职或参与经历等
-- volunteer_experience：志愿服务、公益活动、志愿者经历等
-- awards：获奖经历、竞赛奖项、荣誉称号、奖学金等
-- skills：技能清单、工具、语言能力等
-- certifications：证书、资格认证、语言考试、职业认证等；不要把普通获奖经历放到这里
-- hobbies：个人爱好、兴趣特长等
-- other：无法归入上述类别但可能有用的信息
+- basic_information: name, contact information, job-seeking orientation, and other basic info; if absent, leave empty or do not create
+- profile: personal summary, career summary, self-introduction, job-seeking profile, etc.
+- education: education background, schools, majors, courses, GPA, etc.
+- work_experience: formal work experiences
+- internship_experience: internship experiences
+- project_experience: projects, course projects, self-directed projects, data analysis projects, etc.
+- campus_experience: campus organizations, student jobs, on-campus activities, etc.
+- club_experience: club activities, association experiences, student club roles or participations, etc.
+- volunteer_experience: volunteer service, public welfare activities, volunteer experiences, etc.
+- awards: awards, competition prizes, honorary titles, scholarships, etc.
+- skills: skill lists, tools, language proficiencies, etc.
+- certifications: certificates, qualifications, language exams, professional certifications, etc.; do not put ordinary awards here
+- hobbies: personal hobbies, special interests, etc.
+- other: information that cannot be classified above but may be useful
 
-要求：
-1. section 划分的目标是分类，不是摘要；不要改写成简历 bullet。
-2. 对 work_experience、internship_experience、project_experience、campus_experience、club_experience、volunteer_experience：
-   - 必须把 section 内部拆成 experience_records。
-   - 一条 experience_record 对应一段真实经历，例如同一家公司 + 岗位 + 时间，或同一个项目，或同一个校园组织。
-   - 同一家公司/组织/项目下的不同任务不要拆成多条 record；应保留在同一个 record 的 content 中。
-   - 不同公司、不同项目、不同校园组织不要合并成一条 record。
-   - record 的 content 必须尽量复制该经历的原文事实，保留原始顺序和关键细节。
-3. 对 profile、education、skills、basic_information、certifications、awards、hobbies、other：
-   - 可以不创建 experience_records，使用空数组即可。
-   - content 字段保留该 section 的原文关键信息。
-4. 对已经拆成 experience_records 的 section，section 级 content 可以只写简短说明，避免和 records 重复大段原文。
-5. 如果用户材料本身有明确标题或分隔，例如“用户的实习经历”“用户项目经历”“用户的社团活动经历”，请优先按这些边界判断 record。
-6. 不要因为内容长就省略某段实习、项目、校园/社团/志愿经历；必须全部保留到对应 record。
-7. 工作/实习经历与项目经历必须分开，不要混在一起。
-8. 教育经历和技能不要进入项目经历。
-9. 不要编造用户没有提供的信息；organization、role、time_range 不明确时可以留空。
-10. 输出必须符合系统给定的 JSON schema。
+Requirements:
+1. The goal of section division is classification, not summarization; do not rewrite into resume bullet points.
+2. For work_experience, internship_experience, project_experience, campus_experience, club_experience, volunteer_experience:
+   - You must split the section internally into experience_records.
+   - One experience_record corresponds to one real experience block, e.g., same company + role + time period, or same project, or same campus organization.
+   - Different tasks under the same company/organization/project should NOT be split into multiple records; keep them in the same record's content.
+   - Different companies, different projects, or different campus organizations must NOT be merged into one record.
+   - The content of each record must copy the original factual text of the experience as much as possible, preserving original order and key details.
+3. For profile, education, skills, basic_information, certifications, awards, hobbies, other:
+   - It is acceptable not to create experience_records; use empty arrays.
+   - The content field should retain the original key factual information of that section.
+4. For sections already split into experience_records, section-level content can be a brief note to avoid duplication of large original text blocks with the records.
+5. If the user's materials have clear titles or delimiters, e.g. "User's Internship Experiences", "User's Project Experiences", "User's Club Activities", prioritize these boundaries to determine records.
+6. Do not omit any segment of internship, project, campus/club/volunteer experience due to length; all must be retained in their respective records.
+7. Work/internship experiences and project experiences must be separated, not mixed.
+8. Education and skills should not go into project experiences.
+9. Do not fabricate information not provided by the user; when organization, role, time_range are unclear, they may be left blank.
+10. Output must comply with the JSON schema provided by the system.

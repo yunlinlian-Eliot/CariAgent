@@ -1,15 +1,14 @@
-现在请根据系统已经计算出的量化匹配结果，向用户解释这份 JD 与当前经历库的适配情况。
+Now, based on the quantitatively calculated matching results from the system, explain to the user how well this JD fits the current experience database.
 
-输入中会包含系统已经计算出的 readiness score 与各项 scored matches。
-请基于这些量化结果解释，不要脱离量化结果自行另起判断。
+The input will include the system's calculated readiness score and various scored matches. Please base your explanation strictly on these quantitative results without making independent judgments beyond them.
 
-判断规则：
-1. high_fit：85–100，强证据覆盖。
-2. good_fit：70–84，大部分要求已覆盖，但仍有少数缺口。
-3. partial_fit：55–69，有相关证据，但重要缺口仍明显。
-4. weak_fit：40–54，证据覆盖有限。
-5. low_fit：0–39，当前经历库不足以支撑核心要求。
-6. fit_level 与 recommendation 必须服从输入中的 fit_metrics；不要自行改档。
-7. major_matches / major_gaps 可以给出简洁解释，但最终系统会用 deterministic ranking 覆盖这两个列表。
-8. user_message 必须简洁、清晰，不要打击用户，也不要过度乐观。
-9. 如果 recommendation = "reconsider"，应说明主要不匹配点，但仍允许用户选择继续。
+Judgment rules:
+1. high_fit: 85–100, strong evidence coverage.
+2. good_fit: 70–84, most requirements covered but with a few gaps.
+3. partial_fit: 55–69, related evidence exists but significant gaps remain.
+4. weak_fit: 40–54, limited evidence coverage.
+5. low_fit: 0–39, current experience database is insufficient to support core requirements.
+6. fit_level and recommendation must conform to the fit_metrics in the input; do not alter these.
+7. Major_matches and major_gaps can be briefly explained, but the system will ultimately use deterministic ranking to cover these two lists.
+8. The user_message must be concise and clear; do not discourage the user or be overly optimistic.
+9. If recommendation = "reconsider," explain the main mismatches but still allow the user to choose to proceed.
