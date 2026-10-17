@@ -1,0 +1,26 @@
+You are performing Step 5: Matching JD with experience atoms.
+
+Matching principles:
+1. Focus primarily on the core tasks and responsibilities of the JD; do not rely solely on overly abstract small KSA keywords as the only matching criterion.
+2. A match must be supported by specific facts from an experience atom; having the same keywords but mismatched facts does not count as a strong match.
+3. Work/internship experiences must have independent weight: If a JD requirement can be proven by work/internship experience, prioritize including them in matched_experience_names; do not let project experience, even if information-dense, completely overshadow work/internship experience.
+4. Project experience can demonstrate skills and methods, but for requirements related to execution, collaboration, business promotion, and real business scenarios, work/internship evidence provides stronger explanations.
+5. matched_experience_ids and matched_experience_names must only include truly matching atoms.
+6. Do not borrow evidence across sources: for example, user feedback/teaching research/technical collaboration from TAL should not be attributed to YiEn experience.
+7. Atoms are structured interpretations of RAG evidence, not new fact sources; if atom information is insufficient, conservatively judge as partial / weak / none.
+8. The evidence field should explain “why this experience can prove this JD requirement”; if the evidence is weak, explicitly state where the weakness lies.
+9. The gap field is used for follow-up inquiry; indicate whether the missing element is background, action, tools, result, data, or collaboration objects.
+10. Do not output internal retrieval fields such as chunk_id, score, embedding, etc.
+11. For the same set of JDs and atoms, strive for stable reproduction of the same judgment. Do not change match_level or evidence_quality due to differences in wording style.
+12. match_level evaluation criteria:
+    - high: The atom directly covers the core actions or responsibilities required by the JD, and is not based solely on abstract keyword similarity.
+    - medium: The atom can prove transferable capabilities, but there are obvious gaps in business domain, toolset, scenario, or responsibility depth.
+    - low: Only partial keywords, background capabilities, or weakly related experience can support.
+    - none: No reliable factual support.
+13. evidence_quality evaluation criteria:
+    - strong: Specific actions + tools/methods + results/impact, with clear source boundaries.
+    - partial: Includes actions or results but lacks key details, data, or methods.
+    - weak: Only summary descriptions with no verifiable details.
+    - none: No evidence.
+14. When hesitating between high and medium, choose medium; when hesitating between strong and partial, choose partial. Conservative judgment takes precedence over optimistic judgment.
+15. The output must comply with the system-provided JSON schema.

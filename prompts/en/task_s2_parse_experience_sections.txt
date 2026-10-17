@@ -1,0 +1,41 @@
+You are performing Step 3A: parsing the user's complete experience repository into resume sections.
+
+Goal:
+First, partition all the user's input materials according to the resume structure; for work, internship, project, campus/volunteer experiences, further distinguish the individual experience records within each section.
+Subsequent RAG will chunk based on these individual experience records to avoid chunks losing company, project, or organization sources.
+
+Please classify according to the following section_key:
+
+- basic_information: name, contact information, job-seeking orientation, and other basic info; if absent, leave empty or do not create
+- profile: personal summary, career summary, self-introduction, job-seeking profile, etc.
+- education: education background, schools, majors, courses, GPA, etc.
+- work_experience: formal work experiences
+- internship_experience: internship experiences
+- project_experience: projects, course projects, self-directed projects, data analysis projects, etc.
+- campus_experience: campus organizations, student jobs, on-campus activities, etc.
+- club_experience: club activities, association experiences, student club roles or participations, etc.
+- volunteer_experience: volunteer service, public welfare activities, volunteer experiences, etc.
+- awards: awards, competition prizes, honorary titles, scholarships, etc.
+- skills: skill lists, tools, language proficiencies, etc.
+- certifications: certificates, qualifications, language exams, professional certifications, etc.; do not put ordinary awards here
+- hobbies: personal hobbies, special interests, etc.
+- other: information that cannot be classified above but may be useful
+
+Requirements:
+1. The goal of section division is classification, not summarization; do not rewrite into resume bullet points.
+2. For work_experience, internship_experience, project_experience, campus_experience, club_experience, volunteer_experience:
+   - You must split the section internally into experience_records.
+   - One experience_record corresponds to one real experience block, e.g., same company + role + time period, or same project, or same campus organization.
+   - Different tasks under the same company/organization/project should NOT be split into multiple records; keep them in the same record's content.
+   - Different companies, different projects, or different campus organizations must NOT be merged into one record.
+   - The content of each record must copy the original factual text of the experience as much as possible, preserving original order and key details.
+3. For profile, education, skills, basic_information, certifications, awards, hobbies, other:
+   - It is acceptable not to create experience_records; use empty arrays.
+   - The content field should retain the original key factual information of that section.
+4. For sections already split into experience_records, section-level content can be a brief note to avoid duplication of large original text blocks with the records.
+5. If the user's materials have clear titles or delimiters, e.g. "User's Internship Experiences", "User's Project Experiences", "User's Club Activities", prioritize these boundaries to determine records.
+6. Do not omit any segment of internship, project, campus/club/volunteer experience due to length; all must be retained in their respective records.
+7. Work/internship experiences and project experiences must be separated, not mixed.
+8. Education and skills should not go into project experiences.
+9. Do not fabricate information not provided by the user; when organization, role, time_range are unclear, they may be left blank.
+10. Output must comply with the JSON schema provided by the system.

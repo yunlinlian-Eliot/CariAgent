@@ -47,7 +47,8 @@ prompts/task_*.txt              各步骤 prompt
 data/exp_bank.txt               用户经历库
 data/sample_jd.txt              目标 JD
 outputs/*.json                  中间产物
-outputs/result.md               最终输出
+outputs/result.md               简历正文（不含优化建议）
+outputs/improvement_suggestions.md  独立优化建议
 ```
 
 项目文档：
@@ -92,3 +93,34 @@ RAG 主逻辑已阶段性收束。
 3. 增加运行状态展示；
 4. 稳定 Step 8 输出格式；
 5. 再评估是否引入 LangGraph。
+
+网页生成结果将简历正文与优化建议分开展示，Markdown 和 Word 下载仅包含简历正文。CLI 默认分别保存上述两个文件；网页仍默认不将输出写入磁盘。
+
+## English edition
+
+The English app shares the retrieval, scoring and human-in-the-loop workflow with the Chinese edition. Its UI, synthetic demo inputs, local fallback messages, model instructions, follow-up questions, resume and improvement suggestions use English. Prompt files are in `prompts/en/`. Generated JSON keys and enums remain unchanged.
+
+Run the editions in separate processes (or separate Streamlit deployments):
+
+```bash
+# Chinese edition
+python -m streamlit run ui/app.py
+# English edition
+python -m streamlit run ui/app_en.py
+```
+
+For a separate English deployment on Streamlit Community Cloud, select this repository and set the main file to `ui/app_en.py`. Keep the existing Chinese app pointed at `ui/app.py`. Configure `OPENAI_API_KEY` securely in each app's Streamlit Secrets; do not commit it. Deploying an entry point is a separate step from editing code. A second app receives its own URL.
+
+Offline checks:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Opt-in live test (uses the configured API key and incurs API costs):
+
+```bash
+python scripts/smoke_english.py --output-dir /tmp/cariagent-english-test
+```
+
+This runs English JD analysis, real embeddings and retrieval, matching, local follow-up planning, model review of a simulated answer, and separate resume/advice generation. It rejects Chinese text in the synthetic English outputs. It does not replace human usability testing. Test artifacts are saved to the selected output directory, outside the checkout by default in the example above. User-provided source documents may contain their original names and quotations; English output instructions must not invent facts to translate them.

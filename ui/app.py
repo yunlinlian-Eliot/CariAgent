@@ -21,6 +21,8 @@ if str(CORE_DIR) not in sys.path:
 
 os.environ.setdefault("CARIAGENT_SAVE_OUTPUTS", "0")
 
+from localization import is_english, localized
+
 import simple_mvp
 
 if not os.getenv("OPENAI_API_KEY"):
@@ -428,11 +430,11 @@ st.markdown(
 
 
 STEPS = [
-    ("experience", "经历库", "Experience Bank"),
-    ("jd", "目标 JD", "Target JD"),
-    ("match", "匹配摘要", "Match Summary"),
-    ("followup", "AI 追问", "AI Follow-up"),
-    ("resume", "简历草稿", "Resume Draft"),
+    ("experience", localized('经历库', 'Experience Database'), "Experience Bank"),
+    ("jd", localized('目标 JD', 'Target JD'), "Target JD"),
+    ("match", localized('匹配摘要', 'Match Summary'), "Match Summary"),
+    ("followup", localized('AI 追问', 'AI Follow-up Questions'), "AI Follow-up"),
+    ("resume", localized('简历草稿', 'Resume Draft'), "Resume Draft"),
 ]
 
 
@@ -447,6 +449,7 @@ def workflow_cache_key(stage: str) -> str:
             "experience_text": st.session_state.experience_text,
             "jd_text": st.session_state.jd_text,
             "model_version": getattr(simple_mvp, "DEFAULT_MODEL", ""),
+            "language": "en" if is_english() else "zh",
             "scoring_version": getattr(simple_mvp, "SCORING_VERSION", ""),
             "rubric_version": getattr(simple_mvp, "COVERAGE_RUBRIC_VERSION", ""),
         },
@@ -458,13 +461,13 @@ def workflow_cache_key(stage: str) -> str:
 
 def fit_level_label(value: str) -> str:
     labels = {
-        "high_fit": "高匹配",
-        "good_fit": "良好匹配",
-        "partial_fit": "部分匹配",
-        "weak_fit": "弱匹配",
-        "low_fit": "低匹配",
-        "strong_fit": "强匹配",
-        "adjacent_fit": "可迁移匹配",
+        "high_fit": localized('高匹配', 'High Match'),
+        "good_fit": localized('良好匹配', 'Good Match'),
+        "partial_fit": localized('部分匹配', 'Partial Match'),
+        "weak_fit": localized('弱匹配', 'Weak Match'),
+        "low_fit": localized('低匹配', 'Low Match'),
+        "strong_fit": localized('强匹配', 'Strong Match'),
+        "adjacent_fit": localized('可迁移匹配', 'Transferable Match'),
     }
     return labels.get(value, value or "-")
 
@@ -493,51 +496,19 @@ def read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-DEMO_EXPERIENCE = """模拟测试用例，仅用于参考
-
-下面不是正式简历，是一个用户随手整理的经历库，里面有一些重复、口语化和不够精炼的表达。CariAgent 的任务就是从这种原始材料里提取事实、压缩表达，再结合 JD 生成更像简历的版本。
-
-我大概是数据分析 / 产品运营方向，本科是信息管理与信息系统，2021.09 到 2025.06 在华东财经大学。GPA 3.72/4.00，拿过一次数据分析竞赛二等奖，也做过校商业分析协会的数据组负责人。课程里面和岗位比较相关的有数据库、统计学、Python 数据分析、市场调研、运营管理、实验设计。
-
-2024.05-2024.09，我在阿里巴巴本地生活的到店业务做产品运营实习。主要不是写代码，而是围绕商家成长链路做分析。我们会看新商家从入驻、资料补全、首单转化、活动报名到复购的漏斗变化。我当时用 SQL 拉过一些城市维度的数据，也做过一个周度看板，覆盖大概 12 个城市团队。印象比较深的是有一批商家转化低，最开始大家以为是商家质量差，但我拆了一下路径，发现很多商家卡在资料补全和权益理解这里，另外首周曝光也不够。所以我和产品、运营、销售一起讨论了商家任务中心的改版，主要加了权益解释和任务提醒规则。试点城市首周任务完成率大概提升了 16%。618 活动复盘我也参与过，当时整理了 GMV、订单量、补贴成本、ROI 这些指标，给下一阶段投放做参考。
-
-2023.11-2024.03，我在腾讯广告商业分析组实习。这个更偏数据分析。工作里经常用 SQL 和 Python 清洗广告主投放数据，然后做行业周报。指标包括曝光、点击、CTR、CVR、CPA、预算消耗这些。我分析过教育、游戏、本地服务三个行业，主要看素材表现、投放时段、转化人群这些。有一次发现某个客户的素材点击还可以但转化很差，后来复盘发现是定向人群太窄，而且素材已经疲劳。我做过 20 多页的可视化分析报告，给业务同学做客户复盘用。
-
-2023.06-2023.09，我在字节跳动商业化的增长工具方向做数据产品实习。那段经历比较杂。我帮忙梳理过商家线索管理工具的流程，从线索创建、跟进、转化到流失，把字段和状态都整理了一遍。还访谈过 8 个销售和运营同学，大家反馈比较多的问题是线索状态不统一、跟进记录缺失、重复录入。后来我参与需求评审，写过 PRD 初稿，推动加了线索状态校验和跟进提醒。这个项目的结果没有特别明确的业务数字，但确实减少了一些销售手工核对成本。
-
-学校项目里有一个校园外卖平台用户留存分析，时间大概是 2024.10-2024.12。用的是模拟订单数据。我用 Python 做清洗、特征构造和 cohort 分析，算了留存、复购、客单价。后来把用户分成高频刚需、价格敏感、活动驱动、沉默流失几类，给了优惠券触达和会员权益优化建议。最后用 Tableau 做了 dashboard，在课上做了 15 分钟汇报。
-
-还有一个 RFM 用户分层项目，2024.03-2024.05。就是用 recency、frequency、monetary 算用户价值分，再用 K-means 分群。这个项目比较偏方法练习，但我有设计一个召回策略，也模拟了 A/B 测试方案，指标设的是点击率、复购率、转化成本。
-
-社团方面，2022.09-2023.06 我负责过校商业分析协会的数据组，组织过即时零售、内容电商、会员运营相关分享。还带 5 个人做过校园咖啡消费调研，收了 300 多份问卷，最后做了用户画像报告。
-
-技能大概是 SQL、Python、Excel、Tableau、PowerPoint。方法上接触过 A/B Testing、RFM、K-means、cohort analysis、用户分层、漏斗分析、商业分析和 PRD。
-"""
+DEMO_EXPERIENCE = localized('模拟测试用例，仅用于参考\n\n下面不是正式简历，是一个用户随手整理的经历库，里面有一些重复、口语化和不够精炼的表达。CariAgent 的任务就是从这种原始材料里提取事实、压缩表达，再结合 JD 生成更像简历的版本。\n\n我大概是数据分析 / 产品运营方向，本科是信息管理与信息系统，2021.09 到 2025.06 在华东财经大学。GPA 3.72/4.00，拿过一次数据分析竞赛二等奖，也做过校商业分析协会的数据组负责人。课程里面和岗位比较相关的有数据库、统计学、Python 数据分析、市场调研、运营管理、实验设计。\n\n2024.05-2024.09，我在阿里巴巴本地生活的到店业务做产品运营实习。主要不是写代码，而是围绕商家成长链路做分析。我们会看新商家从入驻、资料补全、首单转化、活动报名到复购的漏斗变化。我当时用 SQL 拉过一些城市维度的数据，也做过一个周度看板，覆盖大概 12 个城市团队。印象比较深的是有一批商家转化低，最开始大家以为是商家质量差，但我拆了一下路径，发现很多商家卡在资料补全和权益理解这里，另外首周曝光也不够。所以我和产品、运营、销售一起讨论了商家任务中心的改版，主要加了权益解释和任务提醒规则。试点城市首周任务完成率大概提升了 16%。618 活动复盘我也参与过，当时整理了 GMV、订单量、补贴成本、ROI 这些指标，给下一阶段投放做参考。\n\n2023.11-2024.03，我在腾讯广告商业分析组实习。这个更偏数据分析。工作里经常用 SQL 和 Python 清洗广告主投放数据，然后做行业周报。指标包括曝光、点击、CTR、CVR、CPA、预算消耗这些。我分析过教育、游戏、本地服务三个行业，主要看素材表现、投放时段、转化人群这些。有一次发现某个客户的素材点击还可以但转化很差，后来复盘发现是定向人群太窄，而且素材已经疲劳。我做过 20 多页的可视化分析报告，给业务同学做客户复盘用。\n\n2023.06-2023.09，我在字节跳动商业化的增长工具方向做数据产品实习。那段经历比较杂。我帮忙梳理过商家线索管理工具的流程，从线索创建、跟进、转化到流失，把字段和状态都整理了一遍。还访谈过 8 个销售和运营同学，大家反馈比较多的问题是线索状态不统一、跟进记录缺失、重复录入。后来我参与需求评审，写过 PRD 初稿，推动加了线索状态校验和跟进提醒。这个项目的结果没有特别明确的业务数字，但确实减少了一些销售手工核对成本。\n\n学校项目里有一个校园外卖平台用户留存分析，时间大概是 2024.10-2024.12。用的是模拟订单数据。我用 Python 做清洗、特征构造和 cohort 分析，算了留存、复购、客单价。后来把用户分成高频刚需、价格敏感、活动驱动、沉默流失几类，给了优惠券触达和会员权益优化建议。最后用 Tableau 做了 dashboard，在课上做了 15 分钟汇报。\n\n还有一个 RFM 用户分层项目，2024.03-2024.05。就是用 recency、frequency、monetary 算用户价值分，再用 K-means 分群。这个项目比较偏方法练习，但我有设计一个召回策略，也模拟了 A/B 测试方案，指标设的是点击率、复购率、转化成本。\n\n社团方面，2022.09-2023.06 我负责过校商业分析协会的数据组，组织过即时零售、内容电商、会员运营相关分享。还带 5 个人做过校园咖啡消费调研，收了 300 多份问卷，最后做了用户画像报告。\n\n技能大概是 SQL、Python、Excel、Tableau、PowerPoint。方法上接触过 A/B Testing、RFM、K-means、cohort analysis、用户分层、漏斗分析、商业分析和 PRD。\n', "Mock test case for reference only\n\nThe following is not a formal resume but a user’s casually compiled experience database containing some duplicates, colloquial, and less concise expressions. CariAgent’s task is to extract facts and condense expressions from this raw material, then combine with the job description (JD) to generate a more resume-like version.\n\nMy general direction is data analysis/product operations. I majored in Information Management and Information Systems for my undergraduate studies from September 2021 to June 2025 at East China University of Finance and Economics. GPA 3.72/4.00; I won second prize once in a data analysis competition and led the data team of the university’s business analysis association. Relevant courses related to the role include database, statistics, Python data analysis, market research, operations management, and experimental design.\n\nFrom May 2024 to September 2024, I interned as a product operation intern in Alibaba Local Life’s in-store business. The focus was not primarily coding but analyzing merchant growth funnels. We examined funnel changes from new merchant onboarding, profile completion, first order conversion, event registration to repurchase. I used SQL to query city-level data and created a weekly dashboard covering about 12 city teams. Notably, a batch of merchants showed low conversion; initially, the team assumed poor merchant quality, but I broke down the pathway and discovered many merchants stalled at profile completion and benefit comprehension, also first-week exposure was insufficient. I collaborated with product, operations, and sales teams to revise the merchant task center by adding benefit explanations and task reminder rules. In pilot cities, first-week task completion rate increased by about 16%. I also participated in the 618 event retrospective, compiling GMV, order volume, subsidy cost, ROI metrics for reference in the next promotion phase.\n\nFrom November 2023 to March 2024, I interned in Tencent Ads' business analysis group, focusing more on data analysis. I frequently used SQL and Python to clean advertiser campaign data and produced weekly industry reports. Metrics included impressions, clicks, CTR, CVR, CPA, and budget consumption. I analyzed education, gaming, and local services industries, mainly studying creative performance, campaign timing, and converting audiences. Once, I found a client’s ads had good click rates but poor conversion; after review, we found targeting was too narrow and creatives were fatigued. I made a 20+ page visualization report for business colleagues to review clients.\n\nFrom June 2023 to September 2023, I interned in ByteDance’s commercialization growth tools direction as a data product intern. The experience was diverse. I helped streamline the merchant lead management tool process from lead creation, follow-up, conversion to loss, organizing fields and statuses. I interviewed 8 sales and operations colleagues; major feedback was inconsistent lead statuses, missing follow-up records, and repeated input. Later, I participated in requirement review, drafted the initial PRD, and pushed for lead status validation and follow-up reminders. The project outcome did not have clear business numbers but reduced manual checking costs for sales.\n\nIn a school project, I analyzed user retention for a campus food delivery platform from October 2024 to December 2024 using simulated order data. I cleaned data, constructed features, and conducted cohort analysis with Python, calculating retention, repurchase, and average order value. I later classified users into frequent/essential, price-sensitive, promotion-driven, and silent churn groups, providing coupon targeting and membership benefits optimization suggestions. Finally, I created a Tableau dashboard and presented a 15-minute report in class.\n\nAnother project was an RFM user segmentation from March 2024 to May 2024 using recency, frequency, and monetary values to score user value, then clustering with K-means. This was more methodological practice; I designed a recall strategy and simulated an A/B test plan measuring click-through rate, repurchase rate, and conversion cost.\n\nIn extracurriculars, from September 2022 to June 2023, I led the university’s business analysis association data team, organizing sharing sessions on instant retail, content e-commerce, and membership operations. I also led a 5-person team conducting campus coffee consumption surveys collecting over 300 questionnaires and produced a user persona report.\n\nSkills include SQL, Python, Excel, Tableau, PowerPoint. Methodologies covered: A/B testing, RFM, K-means, cohort analysis, user segmentation, funnel analysis, business analysis, and PRD writing.")
 
 
-DEMO_JD = """数据分析实习生
-
-岗位职责：
-1. 支持用户增长、会员运营和产品迭代相关的数据分析工作。
-2. 使用 SQL / Python 处理业务数据，搭建日常指标看板和分析报告。
-3. 参与用户分层、活动复盘、A/B 测试和转化漏斗分析。
-4. 与产品、运营和市场团队沟通，基于数据洞察提出优化建议。
-
-任职要求：
-1. 熟悉 SQL，具备 Python 或 R 数据分析经验。
-2. 理解基础统计方法，能清晰解释分析过程和结论。
-3. 有用户增长、产品运营、市场分析或商业分析项目经验优先。
-4. 具备良好的沟通能力和结构化表达能力。
-"""
+DEMO_JD = localized('数据分析实习生\n\n岗位职责：\n1. 支持用户增长、会员运营和产品迭代相关的数据分析工作。\n2. 使用 SQL / Python 处理业务数据，搭建日常指标看板和分析报告。\n3. 参与用户分层、活动复盘、A/B 测试和转化漏斗分析。\n4. 与产品、运营和市场团队沟通，基于数据洞察提出优化建议。\n\n任职要求：\n1. 熟悉 SQL，具备 Python 或 R 数据分析经验。\n2. 理解基础统计方法，能清晰解释分析过程和结论。\n3. 有用户增长、产品运营、市场分析或商业分析项目经验优先。\n4. 具备良好的沟通能力和结构化表达能力。\n', 'Data Analyst Intern\n\nJob Responsibilities:\n1. Support data analysis related to user growth, membership operations, and product iteration.\n2. Use SQL/Python to process business data, build daily metric dashboards, and analysis reports.\n3. Participate in user segmentation, event retrospectives, A/B testing, and conversion funnel analysis.\n4. Communicate with product, operations, and marketing teams to propose optimization suggestions based on data insights.\n\nQualifications:\n1. Familiar with SQL and experienced in Python or R data analysis.\n2. Understand basic statistical methods and can clearly explain analysis processes and conclusions.\n3. Prior project experience in user growth, product operations, market analysis, or business analysis is preferred.\n4. Good communication skills and ability for structured expression.')
 
 
 @st.cache_data(show_spinner=False)
-def load_default_inputs() -> tuple[str, str]:
+def load_default_inputs(language: str) -> tuple[str, str]:
     return DEMO_EXPERIENCE.strip(), DEMO_JD.strip()
 
 
 def reset_demo_session_inputs() -> None:
-    default_experience, default_jd = load_default_inputs()
+    default_experience, default_jd = load_default_inputs("en" if is_english() else "zh")
     st.session_state.workflow_state = None
     st.session_state.openai_client = None
     st.session_state.current_step = "experience"
@@ -615,7 +586,7 @@ def markdown_to_docx_bytes(markdown_text: str) -> bytes:
 
 
 def ensure_session_defaults() -> None:
-    default_experience, default_jd = load_default_inputs()
+    default_experience, default_jd = load_default_inputs("en" if is_english() else "zh")
     defaults = {
         "workflow_state": None,
         "openai_client": None,
@@ -653,7 +624,7 @@ def extract_pdf_text(raw: bytes) -> str:
     try:
         from pypdf import PdfReader
     except ImportError as error:
-        raise RuntimeError("解析 PDF 需要安装 pypdf：D:/Python313/python.exe -m pip install pypdf") from error
+        raise RuntimeError(localized('解析 PDF 需要安装 pypdf：D:/Python313/python.exe -m pip install pypdf', 'PDF parsing requires pypdf. Install it with: python -m pip install pypdf')) from error
     reader = PdfReader(BytesIO(raw))
     pages = [(page.extract_text() or "").strip() for page in reader.pages]
     return "\n\n".join(page for page in pages if page).strip()
@@ -671,8 +642,8 @@ def decode_uploaded_file(uploaded_file) -> str:
     if suffix == ".pdf":
         return extract_pdf_text(raw)
     if suffix in {".png", ".jpg", ".jpeg", ".webp"}:
-        raise RuntimeError("图片解析需要接入 OCR 或视觉模型；当前版本请先粘贴图片中的文字。")
-    raise RuntimeError(f"暂不支持的文件类型：{suffix or uploaded_file.name}")
+        raise RuntimeError(localized('图片解析需要接入 OCR 或视觉模型；当前版本请先粘贴图片中的文字。', 'Image parsing requires integration with OCR or vision models; currently please paste text from the image first.'))
+    raise RuntimeError((f"Unsupported file type: {suffix or uploaded_file.name}" if is_english() else f"暂不支持的文件类型：{suffix or uploaded_file.name}"))
 
 
 def progress_writer(message: str) -> None:
@@ -685,10 +656,10 @@ def visible_progress_writer(message: str) -> None:
 
 def run_timed_step(label: str, fn):
     start = time.perf_counter()
-    visible_progress_writer(f"{label} 开始")
+    visible_progress_writer((f"{label} start" if is_english() else f"{label} 开始"))
     result = fn()
     elapsed = time.perf_counter() - start
-    visible_progress_writer(f"{label} 完成 · {elapsed:.1f}s")
+    visible_progress_writer((f"{label} finished · {elapsed:.1f}s" if is_english() else f"{label} 完成 · {elapsed:.1f}s"))
     return result
 
 
@@ -699,23 +670,23 @@ def page_title_for_step(step_key: str) -> str:
 def status_for_step(step_key: str) -> str:
     state = st.session_state.workflow_state
     if step_key == "experience":
-        return "经历库已就绪" if st.session_state.experience_text else "等待经历库"
+        return localized('经历库已就绪', 'Experience database ready') if st.session_state.experience_text else localized('等待经历库', 'Waiting for experience database')
     if step_key == "jd":
-        return "JD 已分析" if state and state.jd_analysis else "等待分析 JD"
+        return localized('JD 已分析', 'JD analyzed') if state and state.jd_analysis else localized('等待分析 JD', 'Waiting for JD analysis')
     if step_key == "match":
-        return "匹配摘要已生成" if state and state.fit_verdict else "等待匹配"
+        return localized('匹配摘要已生成', 'Match summary generated') if state and state.fit_verdict else localized('等待匹配', 'Waiting for matching')
     if step_key == "followup":
         if state and state.followup_plan:
             questions = get_prioritized_questions(state)
             if questions:
                 handled = min(len(answered_question_ids(state)), len(questions))
                 if handled >= len(questions):
-                    return "追问已处理"
-                return f"AI 追问 {handled}/{len(questions)}"
-            return "AI 追问进行中"
-        return "等待追问"
+                    return localized('追问已处理', 'Follow-up handled')
+                return (f"AI Follow-up {handled}/{len(questions)}" if is_english() else f"AI 追问 {handled}/{len(questions)}")
+            return localized('AI 追问进行中', 'AI Follow-up in progress')
+        return localized('等待追问', 'Waiting for follow-up')
     if step_key == "resume":
-        return "草稿已生成" if state and state.resume_markdown else "等待生成草稿"
+        return localized('草稿已生成', 'Draft generated') if state and state.resume_markdown else localized('等待生成草稿', 'Waiting for draft generation')
     return "Workspace"
 
 
@@ -795,43 +766,43 @@ def get_section_counts() -> dict[str, int]:
     ):
         experience_sections = st.session_state.experience_sections_cache
     labels = {
-        "profile": "个人简介",
-        "education": "教育经历",
-        "work_experience": "工作经历",
-        "internship_experience": "实习经历",
-        "project_experience": "项目经历",
-        "campus_experience": "校园经历",
-        "club_experience": "社团活动",
-        "volunteer_experience": "志愿服务",
-        "awards": "获奖经历",
-        "skills": "技能",
-        "certifications": "证书认证",
-        "basic_information": "基本信息",
-        "hobbies": "个人爱好",
-        "other": "其他",
+        "profile": localized('个人简介', 'Personal Summary'),
+        "education": localized('教育经历', 'Education'),
+        "work_experience": localized('工作经历', 'Work Experience'),
+        "internship_experience": localized('实习经历', 'Internship Experience'),
+        "project_experience": localized('项目经历', 'Project Experience'),
+        "campus_experience": localized('校园经历', 'Campus Experience'),
+        "club_experience": localized('社团活动', 'Club Activities'),
+        "volunteer_experience": localized('志愿服务', 'Volunteer Service'),
+        "awards": localized('获奖经历', 'Awards'),
+        "skills": localized('技能', 'Skills'),
+        "certifications": localized('证书认证', 'Certifications'),
+        "basic_information": localized('基本信息', 'Basic Information'),
+        "hobbies": localized('个人爱好', 'Personal Interests'),
+        "other": localized('其他', 'Others'),
     }
     display_order = [
-        "个人简介",
-        "基本信息",
-        "教育经历",
-        "工作经历",
-        "实习经历",
-        "项目经历",
-        "校园经历",
-        "社团活动",
-        "志愿服务",
-        "获奖经历",
-        "技能",
-        "证书认证",
-        "个人爱好",
-        "其他",
+        localized('个人简介', 'Personal Summary'),
+        localized('基本信息', 'Basic Information'),
+        localized('教育经历', 'Education'),
+        localized('工作经历', 'Work Experience'),
+        localized('实习经历', 'Internship Experience'),
+        localized('项目经历', 'Project Experience'),
+        localized('校园经历', 'Campus Experience'),
+        localized('社团活动', 'Club Activities'),
+        localized('志愿服务', 'Volunteer Service'),
+        localized('获奖经历', 'Awards'),
+        localized('技能', 'Skills'),
+        localized('证书认证', 'Certifications'),
+        localized('个人爱好', 'Personal Interests'),
+        localized('其他', 'Others'),
     ]
     counts = {label: 0 for label in display_order}
     if not experience_sections:
         return counts
     for section in experience_sections.get("experience_sections", []):
         key = section.get("section_key", "")
-        label = labels.get(key, section.get("section_name") or key or "其他")
+        label = labels.get(key, section.get("section_name") or key or localized('其他', 'Others'))
         counts.setdefault(label, 0)
         records = section.get("experience_records") or []
         counts[label] += len(records) if records else 1
@@ -966,17 +937,17 @@ def run_jd_parse_from_session() -> None:
     if cached_state is not None:
         st.session_state.workflow_state = cached_state
         st.session_state.analysis_done = True
-        progress_writer("复用缓存：JD 拆解结果")
+        progress_writer(localized('复用缓存：JD 拆解结果', 'Reuse cache: JD breakdown results'))
         return
 
-    with st.status("CariAgent 正在拆解当前 JD...", expanded=True) as status:
-        status.update(label="CariAgent 正在准备运行环境...")
-        st.write("1/3 准备运行环境")
-        client = run_timed_step("初始化 OpenAI client", simple_mvp.initialize_workflow_runtime)
-        status.update(label="CariAgent 正在读取输入...")
-        st.write("2/3 读取经历库与目标 JD")
+    with st.status(localized('CariAgent 正在拆解当前 JD...', 'CariAgent is breaking down the current JD...'), expanded=True) as status:
+        status.update(label=localized('CariAgent 正在准备运行环境...', 'CariAgent is preparing the running environment...'))
+        st.write(localized('1/3 准备运行环境', '1/3 Preparing running environment'))
+        client = run_timed_step(localized('初始化 OpenAI client', 'Initializing OpenAI client'), simple_mvp.initialize_workflow_runtime)
+        status.update(label=localized('CariAgent 正在读取输入...', 'CariAgent is reading input...'))
+        st.write(localized('2/3 读取经历库与目标 JD', '2/3 Reading experience database and target JD'))
         state = run_timed_step(
-            "读取经历库与 JD",
+            localized('读取经历库与 JD', 'Reading experience database and JD'),
             lambda: simple_mvp.create_workflow_state(
                 st.session_state.experience_text,
                 st.session_state.jd_text,
@@ -988,17 +959,17 @@ def run_jd_parse_from_session() -> None:
         ):
             state.experience_sections = st.session_state.experience_sections_cache
 
-        status.update(label="CariAgent 正在拆解目标 JD...")
-        st.write("3/3 拆解 JD 要求")
+        status.update(label=localized('CariAgent 正在拆解目标 JD...', 'CariAgent is breaking down the target JD...'))
+        st.write(localized('3/3 拆解 JD 要求', '3/3 Decomposing JD requirements'))
         state = run_timed_step(
-            "JD 结构化拆解",
+            localized('JD 结构化拆解', 'JD structured breakdown'),
             lambda: simple_mvp.run_jd_analysis_workflow(client, state),
         )
         st.session_state.workflow_state = state
         st.session_state.openai_client = client
         st.session_state.analysis_done = True
         st.session_state.workflow_cache[cache_key] = state
-        status.update(label="JD 拆解完成", state="complete")
+        status.update(label=localized('JD 拆解完成', 'JD breakdown completed'), state="complete")
 
 
 def run_match_from_session() -> None:
@@ -1016,24 +987,24 @@ def run_match_from_session() -> None:
     cached_state = st.session_state.workflow_cache.get(cache_key)
     if cached_state is not None:
         st.session_state.workflow_state = cached_state
-        progress_writer("复用缓存：匹配摘要")
+        progress_writer(localized('复用缓存：匹配摘要', 'Reuse cache: match summary'))
         return
 
-    with st.status("CariAgent 正在检索证据并生成匹配摘要...", expanded=True) as status:
-        status.update(label="CariAgent 正在检索相关经历证据...")
-        st.write("1/4 检索经历证据")
+    with st.status(localized('CariAgent 正在检索证据并生成匹配摘要...', 'CariAgent is retrieving evidence and generating the match summary...'), expanded=True) as status:
+        status.update(label=localized('CariAgent 正在检索相关经历证据...', 'CariAgent is retrieving relevant experience evidence...'))
+        st.write(localized('1/4 检索经历证据', '1/4 Retrieving experience evidence'))
         state = run_timed_step(
-            "经历库分段 + RAG 检索",
+            localized('经历库分段 + RAG 检索', 'Experience database segmentation + RAG retrieval'),
             lambda: simple_mvp.run_retrieval_workflow(
                 client,
                 state,
                 progress_callback=visible_progress_writer,
             ),
         )
-        status.update(label="CariAgent 正在整理证据并判断覆盖等级...")
-        st.write("2/4 整理 evidence atoms 并判断覆盖等级")
+        status.update(label=localized('CariAgent 正在整理证据并判断覆盖等级...', 'CariAgent is organizing evidence and judging coverage levels...'))
+        st.write(localized('2/4 整理 evidence atoms 并判断覆盖等级', '2/4 Organizing evidence atoms and judging coverage level'))
         state = run_timed_step(
-            "Atoms 抽取 + 匹配 + Fit 判断",
+            localized('Atoms 抽取 + 匹配 + Fit 判断', 'Atoms extraction + matching + Fit judgment'),
             lambda: simple_mvp.run_matching_workflow(
                 client,
                 state,
@@ -1041,13 +1012,13 @@ def run_match_from_session() -> None:
             ),
         )
 
-        status.update(label="CariAgent 正在生成追问计划...")
-        st.write("3/4 生成追问计划")
+        status.update(label=localized('CariAgent 正在生成追问计划...', 'CariAgent is generating follow-up plan...'))
+        st.write(localized('3/4 生成追问计划', '3/4 Generate follow-up plan'))
         state = run_timed_step(
-            "追问计划生成",
+            localized('追问计划生成', 'Follow-up plan generation'),
             lambda: simple_mvp.run_followup_planning_workflow(state),
         )
-        st.write("4/4 保存匹配摘要")
+        st.write(localized('4/4 保存匹配摘要', '4/4 Save match summary'))
 
         st.session_state.workflow_state = state
         st.session_state.openai_client = client
@@ -1055,7 +1026,7 @@ def run_match_from_session() -> None:
             st.session_state.experience_sections_cache = state.experience_sections
             st.session_state.experience_sections_cache_text = state.experience_text
         st.session_state.workflow_cache[cache_key] = state
-        status.update(label="匹配摘要已生成", state="complete")
+        status.update(label=localized('匹配摘要已生成', 'Match summary generated'), state="complete")
 
 
 def render_page_heading(title: str, subtitle: str) -> None:
@@ -1072,8 +1043,8 @@ def render_page_heading(title: str, subtitle: str) -> None:
 
 def render_experience_page() -> None:
     render_page_heading(
-        "经历库",
-        "维护你的真实职业经历。CariAgent 会从这里提取证据来匹配每一个岗位。",
+        localized('经历库', 'Experience Database'),
+        localized('维护你的真实职业经历。CariAgent 会从这里提取证据来匹配每一个岗位。', 'Maintain your authentic professional experience. CariAgent will extract evidence from here to match every role.'),
     )
     counts = get_section_counts()
     st.markdown(
@@ -1085,7 +1056,7 @@ def render_experience_page() -> None:
     )
 
     uploaded = st.file_uploader(
-        "导入简历 / 文档",
+        localized('导入简历 / 文档', 'Import Resume/Document'),
         type=["txt", "md", "docx", "pdf", "png", "jpg", "jpeg", "webp"],
         label_visibility="collapsed",
     )
@@ -1095,26 +1066,31 @@ def render_experience_page() -> None:
             if uploaded_text:
                 st.session_state.experience_text = uploaded_text
                 st.session_state.workflow_state = None
-                st.success("已读取上传内容，可继续编辑。")
+                st.success(localized('已读取上传内容，可继续编辑。', 'Uploaded content read, can continue editing.'))
         except Exception as error:
             st.warning(str(error))
 
     st.text_area(
-        "纯文本编辑（Markdown 格式）",
+        localized('纯文本编辑（Markdown 格式）', 'Plain Text Editing (Markdown Format)'),
         key="experience_text",
         height=430,
     )
     st.markdown(
-        f"""
+        (f"""
+        <div class="ca-soft-card">
+            <span class="ca-success">✓ Experience database ready</span><br>
+            <span class="ca-muted">Evidence Source · {len(st.session_state.experience_text)} characters</span>
+        </div>
+        """ if is_english() else f"""
         <div class="ca-soft-card">
             <span class="ca-success">✓ 经历库已就绪</span><br>
             <span class="ca-muted">Evidence Source · {len(st.session_state.experience_text)} 字符</span>
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
     _, right = st.columns([3, 1])
-    if right.button("继续填写目标 JD  →", type="primary", use_container_width=True):
+    if right.button(localized('继续填写目标 JD  →', 'Continue filling in the target JD  →'), type="primary", use_container_width=True):
         st.session_state.current_step = "jd"
         st.rerun()
 
@@ -1122,51 +1098,57 @@ def render_experience_page() -> None:
 def render_jd_page() -> None:
     state = st.session_state.workflow_state
     render_page_heading(
-        "目标 JD",
-        "粘贴一个你感兴趣的岗位描述，CariAgent 将提炼核心要求。",
+        localized('目标 JD', 'Target JD'),
+        localized('粘贴一个你感兴趣的岗位描述，CariAgent 将提炼核心要求。', 'Paste a job description you are interested in, CariAgent will extract the core requirements.'),
     )
 
     if state and state.jd_analysis:
         jd = state.jd_analysis
         st.markdown(
-            f"""
+            (f"""
+            <div class="ca-card">
+                <div class="ca-label">Target Role</div>
+                <h2>{safe_text(jd.get("role_title", "Target Role"))}</h2>
+                <p>{safe_text(jd.get("job_goal", ""))}</p>
+            </div>
+            """ if is_english() else f"""
             <div class="ca-card">
                 <div class="ca-label">目标岗位</div>
                 <h2>{safe_text(jd.get("role_title", "目标岗位"))}</h2>
                 <p>{safe_text(jd.get("job_goal", ""))}</p>
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
-        st.markdown("#### 核心要求")
+        st.markdown(localized('#### 核心要求', '#### Core Requirements'))
         for item in (jd.get("core_responsibilities", []) or [])[:5]:
             st.write(f"- {item}")
         keywords = jd.get("keywords_to_mirror", []) or []
         if keywords:
-            st.markdown("#### 关键词")
+            st.markdown(localized('#### 关键词', '#### Keywords'))
             st.markdown(
                 "".join(f'<span class="ca-pill">{safe_text(item)}</span>' for item in keywords[:12]),
                 unsafe_allow_html=True,
             )
-        with st.expander("查看完整 JD 解析详情", expanded=False):
+        with st.expander(localized('查看完整 JD 解析详情', 'View full JD parsing details'), expanded=False):
             st.json(jd, expanded=False)
         left, right = st.columns([1, 1])
-        if left.button("← 重新粘贴 JD"):
+        if left.button(localized('← 重新粘贴 JD', '← Paste JD again')):
             st.session_state.workflow_state = None
             st.rerun()
-        if right.button("查看匹配摘要  →", type="primary"):
+        if right.button(localized('查看匹配摘要  →', 'View Match Summary  →'), type="primary"):
             if not state.fit_verdict:
                 try:
                     run_match_from_session()
                 except Exception as error:
-                    st.error(f"匹配分析失败：{type(error).__name__}: {error}")
+                    st.error((f"Match analysis failed: {type(error).__name__}: {error}" if is_english() else f"匹配分析失败：{type(error).__name__}: {error}"))
                     return
             st.session_state.current_step = "match"
             st.rerun()
         return
 
     uploaded = st.file_uploader(
-        "上传 JD 文件",
+        localized('上传 JD 文件', 'Upload JD File'),
         type=["txt", "md", "docx", "pdf", "png", "jpg", "jpeg", "webp"],
         label_visibility="collapsed",
     )
@@ -1175,19 +1157,19 @@ def render_jd_page() -> None:
             uploaded_text = decode_uploaded_file(uploaded)
             if uploaded_text:
                 st.session_state.jd_text = uploaded_text
-                st.success("已读取上传 JD，可继续编辑。")
+                st.success(localized('已读取上传 JD，可继续编辑。', 'Uploaded JD read, can continue editing.'))
         except Exception as error:
             st.warning(str(error))
 
-    st.text_area("岗位描述（JD）", key="jd_text", height=420)
-    st.caption(f"{len(st.session_state.jd_text)} 字符")
+    st.text_area(localized('岗位描述（JD）', 'Job Description (JD)'), key="jd_text", height=420)
+    st.caption((f"{len(st.session_state.jd_text)} characters" if is_english() else f"{len(st.session_state.jd_text)} 字符"))
     _, right = st.columns([3, 1])
-    if right.button("分析 JD", type="primary", use_container_width=True):
+    if right.button(localized('分析 JD', 'Analyze JD'), type="primary", use_container_width=True):
         try:
             run_jd_parse_from_session()
             st.rerun()
         except Exception as error:
-            st.error(f"运行失败：{type(error).__name__}: {error}")
+            st.error((f"Run failed: {type(error).__name__}: {error}" if is_english() else f"运行失败：{type(error).__name__}: {error}"))
 
 
 def score_to_display(score) -> tuple[int, float]:
@@ -1206,7 +1188,7 @@ def render_summary_card(title: str, items: list[str], icon_class: str, icon: str
         st.markdown(f"#### {title}")
         display_items = short_items(items, 3)
         if not display_items:
-            st.caption("暂无可展示条目")
+            st.caption(localized('暂无可展示条目', 'No entries available for display'))
             return
         for item in display_items:
             st.markdown(
@@ -1219,34 +1201,40 @@ def render_summary_card(title: str, items: list[str], icon_class: str, icon: str
 def render_match_page() -> None:
     state = st.session_state.workflow_state
     render_page_heading(
-        "匹配摘要",
-        "基于你的经历库与目标 JD 的 RAG 检索结果。",
+        localized('匹配摘要', 'Match Summary'),
+        localized('基于你的经历库与目标 JD 的 RAG 检索结果。', 'Based on your experience database and the RAG retrieval results of the target JD.'),
     )
     if not state or not state.fit_verdict:
-        st.info("还没有匹配摘要。请先在目标 JD 页面运行分析。")
+        st.info(localized('还没有匹配摘要。请先在目标 JD 页面运行分析。', 'No match summary yet. Please run analysis first on the target JD page.'))
         c1, c2 = st.columns([1, 1])
-        if c1.button("去填写目标 JD"):
+        if c1.button(localized('去填写目标 JD', 'Go fill target JD')):
             st.session_state.current_step = "jd"
             st.rerun()
-        if state and state.jd_analysis and c2.button("开始匹配分析", type="primary"):
+        if state and state.jd_analysis and c2.button(localized('开始匹配分析', 'Start Matching Analysis'), type="primary"):
             try:
                 run_match_from_session()
                 st.rerun()
             except Exception as error:
-                st.error(f"匹配分析失败：{type(error).__name__}: {error}")
+                st.error((f"Match analysis failed: {type(error).__name__}: {error}" if is_english() else f"匹配分析失败：{type(error).__name__}: {error}"))
         return
 
     percent, progress = score_to_display(state.readiness_score.get("overall_readiness_score", 0))
     col_score, col_fit = st.columns(2)
     with col_score:
         st.markdown(
-            f"""
+            (f"""
+            <div class="ca-card">
+                <div class="ca-label">Readiness Score</div>
+                <span class="ca-big-score">{percent}</span><span class="ca-score-denom"> /100</span>
+                <p class="ca-muted">Based on RAG retrieval experience coverage</p>
+            </div>
+            """ if is_english() else f"""
             <div class="ca-card">
                 <div class="ca-label">Readiness Score</div>
                 <span class="ca-big-score">{percent}</span><span class="ca-score-denom"> /100</span>
                 <p class="ca-muted">基于 RAG 检索的经历覆盖率</p>
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
         render_score_bar(progress)
@@ -1264,20 +1252,20 @@ def render_match_page() -> None:
 
     col_match, col_gap = st.columns(2)
     with col_match:
-        render_summary_card("TOP 匹配", state.fit_verdict.get("major_matches", []), "ca-check", "✓")
+        render_summary_card(localized('TOP 匹配', 'TOP Matches'), state.fit_verdict.get("major_matches", []), "ca-check", "✓")
     with col_gap:
-        render_summary_card("TOP 缺口", state.fit_verdict.get("major_gaps", []), "ca-warn", "⚠")
+        render_summary_card(localized('TOP 缺口', 'TOP Gaps'), state.fit_verdict.get("major_gaps", []), "ca-warn", "⚠")
 
-    with st.expander("查看 RAG Evidence", expanded=False):
+    with st.expander(localized('查看 RAG Evidence', 'View RAG Evidence'), expanded=False):
         chunks = state.retrieval_result.get("selected_chunks", [])
         st.caption(f"Selected evidence chunks: {len(chunks)}")
         for index, chunk in enumerate(chunks[:20], start=1):
-            with st.expander(f"Evidence {index}: {chunk.get('experience_title', '未识别来源')}"):
+            with st.expander((f"Evidence {index}: {chunk.get('experience_title', 'Unrecognized Source')}" if is_english() else f"Evidence {index}: {chunk.get('experience_title', '未识别来源')}")):
                 st.caption(chunk.get("section_group", ""))
                 st.write(chunk.get("text", ""))
-    with st.expander("查看匹配经历详情", expanded=False):
+    with st.expander(localized('查看匹配经历详情', 'View Matching Experience Details'), expanded=False):
         st.json(state.match_result, expanded=False)
-    with st.expander("查看 Workflow Trace", expanded=False):
+    with st.expander(localized('查看 Workflow Trace', 'View Workflow Trace'), expanded=False):
         if st.session_state.progress_log:
             for item in st.session_state.progress_log:
                 st.write(item)
@@ -1298,17 +1286,17 @@ def render_match_page() -> None:
                 )
 
     left, right = st.columns([1, 1])
-    if left.button("← 返回目标 JD"):
+    if left.button(localized('← 返回目标 JD', '← Return to Target JD')):
         st.session_state.current_step = "jd"
         st.rerun()
-    if right.button("继续 AI 追问  →", type="primary"):
+    if right.button(localized('继续 AI 追问  →', 'Continue AI Follow-up  →'), type="primary"):
         st.session_state.current_step = "followup"
         st.rerun()
 
 
 def generate_resume_from_state(state: simple_mvp.WorkflowState) -> None:
     client = st.session_state.openai_client or simple_mvp.initialize_workflow_runtime()
-    with st.spinner("正在生成简历草稿..."):
+    with st.spinner(localized('正在生成简历草稿...', 'Generating resume draft...')):
         state = simple_mvp.run_resume_generation_workflow(client, state)
         simple_mvp.save_workflow_trace(state)
         st.session_state.workflow_state = state
@@ -1320,14 +1308,14 @@ def generate_resume_from_state(state: simple_mvp.WorkflowState) -> None:
 def render_followup_page() -> None:
     state = st.session_state.workflow_state
     render_page_heading(
-        "AI 追问",
-        "优先处理最有价值的证据缺口。",
+        localized('AI 追问', 'AI Follow-up'),
+        localized('优先处理最有价值的证据缺口。', 'Prioritize addressing the most valuable evidence gaps.'),
     )
     if not state:
-        st.info("请先运行 JD 分析。")
+        st.info(localized('请先运行 JD 分析。', 'Please run JD analysis first.'))
         return
     st.markdown(
-        '<div class="ca-footnote">* 本次回答只用于当前简历生成。</div>',
+        localized('<div class="ca-footnote">* 本次回答只用于当前简历生成。</div>', '<div class="ca-footnote">* This answer is only for the current resume generation.</div>'),
         unsafe_allow_html=True,
     )
 
@@ -1336,40 +1324,45 @@ def render_followup_page() -> None:
     if question:
         question_count = len(questions)
         st.markdown(
-            f"""
+            (f"""
+            <div class="ca-card">
+                <div class="ca-label">CariAgent Follow-up · {question_index} / {question_count}</div>
+                <div class="ca-question-text">{safe_text(question.get("question", ""))}</div>
+            </div>
+            """ if is_english() else f"""
             <div class="ca-card">
                 <div class="ca-label">CariAgent 追问 · {question_index} / {question_count}</div>
                 <div class="ca-question-text">{safe_text(question.get("question", ""))}</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
-        with st.expander("为什么要提问这个问题？", expanded=False):
+        with st.expander(localized('为什么要提问这个问题？', 'Why ask this question?'), expanded=False):
             col_reason, col_exp = st.columns(2)
             with col_reason:
-                st.caption("提问原因")
+                st.caption(localized('提问原因', 'Reason for question'))
                 st.write(question.get("why_ask", ""))
-                st.caption("缺失证据类型")
+                st.caption(localized('缺失证据类型', 'Missing evidence type'))
                 st.write(question.get("target_requirement", ""))
             with col_exp:
-                st.caption("关联经历")
+                st.caption(localized('关联经历', 'Related Experience'))
                 st.write(question.get("related_experience_name", ""))
     else:
         if questions:
-            st.success("本轮候选追问已处理完，可以生成简历草稿。")
+            st.success(localized('本轮候选追问已处理完，可以生成简历草稿。', 'This round of candidate follow-up questions completed, resume draft can be generated.'))
         else:
-            st.info("当前没有候选追问，可以直接生成简历草稿。")
+            st.info(localized('当前没有候选追问，可以直接生成简历草稿。', 'No candidate follow-up questions currently, can generate resume draft directly.'))
 
     if question:
         answer_text = st.text_area(
-            "你的回答",
+            localized('你的回答', 'Your Answer'),
             key=f"followup_answer_{question.get('id', question_index)}",
             height=180,
-            placeholder="在这里输入你的回答，尽量包含具体细节、数据或决策过程。",
+            placeholder=localized('在这里输入你的回答，尽量包含具体细节、数据或决策过程。', 'Enter your answer here, try to include concrete details, data, or decision processes.'),
         )
         skip_col, submit_col, resume_col = st.columns([1, 1, 1])
         with skip_col:
-            if st.button("跳过", key="followup_skip"):
+            if st.button(localized('跳过', 'Skip'), key="followup_skip"):
                 set_reviewed_answers_from_question(
                     st.session_state.openai_client,
                     state,
@@ -1378,47 +1371,52 @@ def render_followup_page() -> None:
                 )
                 st.rerun()
         with submit_col:
-            if st.button("提交回答", key="followup_submit", type="primary"):
+            if st.button(localized('提交回答', 'Submit Answer'), key="followup_submit", type="primary"):
                 client = st.session_state.openai_client or simple_mvp.initialize_workflow_runtime()
                 try:
                     set_reviewed_answers_from_question(client, state, question, answer_text)
                     st.session_state.followup_done = True
                     st.rerun()
                 except Exception as error:
-                    st.error(f"追问回答理解失败：{type(error).__name__}: {error}")
+                    st.error((f"Follow-up answer interpretation failed: {type(error).__name__}: {error}" if is_english() else f"追问回答理解失败：{type(error).__name__}: {error}"))
         with resume_col:
-            if st.button("生成简历草稿  →", key="followup_generate_inline", type="primary"):
+            if st.button(localized('生成简历草稿  →', 'Generate Resume Draft  →'), key="followup_generate_inline", type="primary"):
                 try:
                     generate_resume_from_state(state)
                 except Exception as error:
-                    st.error(f"简历生成失败：{type(error).__name__}: {error}")
+                    st.error((f"Resume generation failed: {type(error).__name__}: {error}" if is_english() else f"简历生成失败：{type(error).__name__}: {error}"))
     elif state.reviewed_answers:
         items = reviewed_answer_items(state)
         info = items[-1] if items else {}
-        usable = "；".join(info.get("usable_information", []) or []) or "已记录本轮回答。"
+        usable = "；".join(info.get("usable_information", []) or []) or localized('已记录本轮回答。', 'This round of answers recorded.')
         st.markdown(
-            f"""
+            (f"""
+            <div class="ca-card">
+                <span class="ca-success">✓ Processed {len(items)} follow-up questions</span>
+                <p>{safe_text(usable)}</p>
+            </div>
+            """ if is_english() else f"""
             <div class="ca-card">
                 <span class="ca-success">✓ 已处理 {len(items)} 个追问</span>
                 <p>{safe_text(usable)}</p>
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
     st.markdown('<div class="ca-followup-actions-spacer"></div>', unsafe_allow_html=True)
     nav_col, _, resume_col = st.columns([1, 1, 1])
     with nav_col:
-        if st.button("← 返回匹配摘要", key="followup_back"):
+        if st.button(localized('← 返回匹配摘要', '← Return to Match Summary'), key="followup_back"):
             st.session_state.current_step = "match"
             st.rerun()
     if not question:
         with resume_col:
-            if st.button("生成简历草稿  →", key="followup_generate_bottom", type="primary"):
+            if st.button(localized('生成简历草稿  →', 'Generate Resume Draft  →'), key="followup_generate_bottom", type="primary"):
                 try:
                     generate_resume_from_state(state)
                 except Exception as error:
-                    st.error(f"简历生成失败：{type(error).__name__}: {error}")
+                    st.error((f"Resume generation failed: {type(error).__name__}: {error}" if is_english() else f"简历生成失败：{type(error).__name__}: {error}"))
 
 
 def experiences_used(state: simple_mvp.WorkflowState) -> list[str]:
@@ -1433,15 +1431,15 @@ def experiences_used(state: simple_mvp.WorkflowState) -> list[str]:
 def render_resume_page() -> None:
     state = st.session_state.workflow_state
     render_page_heading(
-        "简历草稿",
-        "基于经历库 + RAG 检索 + AI 追问回答生成。",
+        localized('简历草稿', 'Resume Draft'),
+        localized('基于经历库 + RAG 检索 + AI 追问回答生成。', 'Generated based on experience database + RAG retrieval + AI follow-up answers.'),
     )
     if not state:
-        st.info("请先运行 JD 分析。")
+        st.info(localized('请先运行 JD 分析。', 'Please run JD analysis first.'))
         return
     if not state.resume_markdown:
-        st.info("简历草稿还没有生成。")
-        if st.button("去 AI 追问 / 生成草稿"):
+        st.info(localized('简历草稿还没有生成。', 'Resume draft has not been generated yet.'))
+        if st.button(localized('去 AI 追问 / 生成草稿', 'Go to AI Follow-up / Generate Draft')):
             st.session_state.current_step = "followup"
             st.rerun()
         return
@@ -1452,37 +1450,41 @@ def render_resume_page() -> None:
             st.markdown(state.resume_markdown)
     with right:
         with st.container(border=True):
-            st.markdown("#### 使用的经历")
+            st.markdown(localized('#### 使用的经历', '#### Experiences Used'))
             for name in experiences_used(state):
                 st.write(f"✓ {name}")
             st.markdown("---")
-            st.markdown("#### 最强证据")
+            st.markdown(localized('#### 最强证据', '#### Strongest Evidence'))
             for item in short_items(state.fit_verdict.get("major_matches", []), 2):
                 st.write(f"- {item}")
 
     md_col, docx_col = st.columns([1, 1])
     with md_col:
         st.download_button(
-            "下载 Markdown",
+            localized('下载 Markdown', 'Download Markdown'),
             data=state.resume_markdown,
-            file_name="cariagent_resume_draft.md",
+            file_name="cariagent_resume_en.md" if is_english() else "cariagent_resume_draft.md",
             mime="text/markdown",
             use_container_width=True,
         )
     with docx_col:
         st.download_button(
-            "下载 Word (.docx)",
+            localized('下载 Word (.docx)', 'Download Word (.docx)'),
             data=markdown_to_docx_bytes(state.resume_markdown),
-            file_name="cariagent_resume_draft.docx",
+            file_name="cariagent_resume_en.docx" if is_english() else "cariagent_resume_draft.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             use_container_width=True,
         )
+
+    if state.improvement_suggestions_markdown:
+        with st.expander(localized('简历优化建议（不包含在下载文件中）', 'Resume Improvement Suggestions (Not Included in Downloaded File)'), expanded=True):
+            st.markdown(state.improvement_suggestions_markdown)
 
 
 def display_last_run() -> None:
     state = st.session_state.get("workflow_state")
     if not state or not any([state.fit_verdict, state.readiness_score, state.resume_markdown]):
-        st.info("当前会话还没有可展示的历史运行。")
+        st.info(localized('当前会话还没有可展示的历史运行。', 'No historical runs available for display in the current session.'))
         return
     score = "-"
     if isinstance(state.readiness_score.get("overall_readiness_score"), (int, float)):
@@ -1490,7 +1492,15 @@ def display_last_run() -> None:
     fit_level = fit_level_label((state.fit_verdict or {}).get("fit_level", "-"))
     recommendation = (state.fit_verdict or {}).get("recommendation", "-")
     st.markdown(
-        f"""
+        (f"""
+        <div class="ca-history-row">
+            <div>
+                <div class="ca-history-title">Current Session</div>
+                <div class="ca-history-meta">Readiness {safe_text(score)} · {safe_text(fit_level)}</div>
+            </div>
+            <div class="ca-history-meta">{safe_text(recommendation)}</div>
+        </div>
+        """ if is_english() else f"""
         <div class="ca-history-row">
             <div>
                 <div class="ca-history-title">当前会话</div>
@@ -1498,26 +1508,26 @@ def display_last_run() -> None:
             </div>
             <div class="ca-history-meta">{safe_text(recommendation)}</div>
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
-    with st.expander("查看简历草稿", expanded=False):
-        st.markdown(state.resume_markdown or "暂无简历输出")
+    with st.expander(localized('查看简历草稿', 'View Resume Draft'), expanded=False):
+        st.markdown(state.resume_markdown or localized('暂无简历输出', 'No resume output yet'))
 
 
 def display_sidebar_experience_bank() -> None:
     try:
         counts = get_section_counts()
     except Exception as error:
-        st.caption(f"经历库摘要暂时不可用：{type(error).__name__}")
+        st.caption((f"Experience database summary temporarily unavailable: {type(error).__name__}" if is_english() else f"经历库摘要暂时不可用：{type(error).__name__}"))
         counts = {}
-    st.caption(f"当前经历库：{len(st.session_state.experience_text)} 字符")
+    st.caption((f"Current experience database: {len(st.session_state.experience_text)} characters" if is_english() else f"当前经历库：{len(st.session_state.experience_text)} 字符"))
     visible_counts = [f"{name} {count}" for name, count in counts.items() if count]
     if visible_counts:
         st.caption(" · ".join(visible_counts))
     else:
-        st.caption("尚未完成结构化解析，当前保存的是原始文本。")
-    if st.button("打开经历库", use_container_width=True):
+        st.caption(localized('尚未完成结构化解析，当前保存的是原始文本。', 'Structured parsing not yet completed, current saved text is raw.'))
+    if st.button(localized('打开经历库', 'Open Experience Database'), use_container_width=True):
         st.session_state.current_step = "experience"
         st.rerun()
 
@@ -1530,17 +1540,17 @@ def main() -> None:
     st.sidebar.title("CariAgent")
     st.sidebar.write("OpenAI API Key")
     if os.getenv("OPENAI_API_KEY"):
-        st.sidebar.success("已配置")
+        st.sidebar.success(localized('已配置', 'Configured'))
     else:
-        st.sidebar.warning("未配置")
-    st.sidebar.caption("公开部署时请使用 Streamlit Secrets。")
-    with st.sidebar.expander("个人经历库", expanded=True):
+        st.sidebar.warning(localized('未配置', 'Not Configured'))
+    st.sidebar.caption(localized('公开部署时请使用 Streamlit Secrets。', 'Use Streamlit Secrets for public deployment.'))
+    with st.sidebar.expander(localized('个人经历库', 'Personal Experience Database'), expanded=True):
         display_sidebar_experience_bank()
-    with st.sidebar.expander("历史运行", expanded=False):
+    with st.sidebar.expander(localized('历史运行', 'History'), expanded=False):
         display_last_run()
-        if st.button("重置当前会话", use_container_width=True):
+        if st.button(localized('重置当前会话', 'Reset Current Session'), use_container_width=True):
             reset_demo_session_inputs()
-            st.session_state.history_clear_message = "已重置当前会话，并恢复虚拟测试用例。本地 outputs 文件不会被删除。"
+            st.session_state.history_clear_message = localized('已重置当前会话，并恢复虚拟测试用例。本地 outputs 文件不会被删除。', 'Current session reset, and virtual test cases restored. Local outputs folder will not be deleted.')
             st.rerun()
     if st.session_state.get("history_clear_message"):
         st.sidebar.success(st.session_state.history_clear_message)

@@ -5,6 +5,11 @@ import json
 import os
 import time
 
+try:
+    from .localization import is_english, localized
+except ImportError:
+    from localization import is_english, localized
+
 from openai import OpenAI, RateLimitError
 try:
     from retrieval import retrieve_sectioned_task_unit_evidence
@@ -56,8 +61,11 @@ MIN_EXPECTED_GAIN = 0.05
 MAX_QUESTIONS = 10
 MAX_TOPIC_FOLLOWUPS = 2
 TOPIC_CLARIFICATION_BUDGET = 1
-EXIT_WORDS = {"done", "\u7ed3\u675f", "\u5148\u751f\u6210", "\u9000\u51fa", "\u4e0d\u95ee\u4e86"}
-SKIP_WORDS = {"pass", "\u6ca1\u6709", "\u65e0", "\u4e0d\u77e5\u9053", "\u4e0d\u6e05\u695a", "\u4e0b\u4e00\u4e2a", "\u8df3\u8fc7", "\u7565\u8fc7", "\u6ca1\u4e86", "\u4e0d\u4e86"}
+EXIT_WORDS = {"done", localized('结束', 'End'), localized('先生成', 'Generate first'), localized('退出', 'Exit'), localized('不问了', 'No more questions')}
+SKIP_WORDS = {"pass", localized('没有', 'No'), localized('无', 'None'), localized('不知道', "Don't know"), localized('不清楚', 'Unclear'), localized('下一个', 'Next'), localized('跳过', 'Skip'), localized('略过', 'Pass'), localized('没了', "That's all"), localized('不了', 'No thanks')}
+if is_english():
+    EXIT_WORDS |= {"finish", "stop", "generate now"}
+    SKIP_WORDS |= {"skip", "none", "n/a", "not sure", "i don't know", "i do not know"}
 CHUNKS_PER_TASK_UNIT = int(os.getenv("CHUNKS_PER_TASK_UNIT", os.getenv("CHUNKS_PER_REQUIREMENT", "3")))
 MAX_RETRIEVED_CHUNKS = int(os.getenv("MAX_RETRIEVED_CHUNKS", "18"))
 PROFESSIONAL_SECTION_KEYS = {"work_experience", "internship_experience"}
@@ -548,7 +556,17 @@ TOPIC_FOLLOWUP_SCHEMA = object_schema(
     ],
 )
 
+RESUME_OUTPUT_SCHEMA = object_schema(
+    {
+        "resume_markdown": {"type": "string"},
+        "improvement_suggestions_markdown": {"type": "string"},
+    },
+    ["resume_markdown", "improvement_suggestions_markdown"],
+)
+
+
 SCHEMAS = {
+    "resume_output": RESUME_OUTPUT_SCHEMA,
     "jd_analysis": JD_ANALYSIS_SCHEMA,
     "experience_sections": EXPERIENCE_SECTIONS_SCHEMA,
     "experience_atoms": EXPERIENCE_ATOMS_SCHEMA,
@@ -607,7 +625,8 @@ def save_experience_updates(notes: list) -> None:
 
 def load_prompt(file_name: str) -> str:
     """读取 txt prompt，方便你以后直接改 prompt 文本。"""
-    return (PROMPT_DIR / file_name).read_text(encoding="utf-8")
+    directory = PROMPT_DIR / "en" if is_english() else PROMPT_DIR
+    return (directory / file_name).read_text(encoding="utf-8")
 
 
 def render_prompt(template: str, **values: str) -> str:
@@ -693,7 +712,7 @@ def create_response_with_retry(client: OpenAI, **kwargs):
             if attempt >= OPENAI_MAX_RETRIES:
                 raise
             wait_seconds = OPENAI_RETRY_SECONDS * (attempt + 1)
-            print(f"遇到 OpenAI 速率限制，等待 {wait_seconds:.0f} 秒后自动重试...")
+            print((f"Encountered OpenAI rate limit, will retry automatically after waiting {wait_seconds:.0f} seconds..." if is_english() else f"遇到 OpenAI 速率限制，等待 {wait_seconds:.0f} 秒后自动重试..."))
             time.sleep(wait_seconds)
 
 
@@ -705,7 +724,7 @@ def parse_json_response_or_raise(response, schema_name: str) -> dict:
         if SAVE_OUTPUTS:
             debug_path.write_text(response.output_text or "", encoding="utf-8")
         raise ValueError(
-            f"模型没有返回可解析 JSON，原始输出路径：{debug_path}"
+            (f"Model did not return parseable JSON, raw output path: {debug_path}" if is_english() else f"模型没有返回可解析 JSON，原始输出路径：{debug_path}")
         )
 
 
@@ -722,7 +741,7 @@ def build_selected_chunks_context(retrieval_result: dict) -> str:
     evidence_index = 1
 
     for chunk in retrieval_result.get("selected_chunks", []):
-        source = chunk.get("experience_title", "未识别来源经历")
+        source = chunk.get("experience_title", localized('未识别来源经历', 'Unrecognized source experience'))
         company_or_project = chunk.get("company_or_project", "")
         section_type = chunk.get("section_type", "")
         section_group = chunk.get("section_group", "")
@@ -1026,13 +1045,19 @@ def ask_ai_for_text_once(
 
 def review_user_answers(client: OpenAI, answers: list[dict]) -> dict:
     """Review follow-up answers as one compact independent call."""
-    answer_review_prompt = f"""
+    answer_review_prompt = (f"""
+Below are the same user's natural language responses to this round of follow-up questions:
+
+{to_prompt_json(answers)}
+
+{load_prompt("task_s7_review_answers.txt")}
+""" if is_english() else f"""
 下面是同一位用户对本轮追问给出的自然语言回答：
 
 {to_prompt_json(answers)}
 
 {load_prompt("task_s7_review_answers.txt")}
-"""
+""")
     _, reviewed = ask_ai_for_json_once(
         client,
         answer_review_prompt,
@@ -1272,13 +1297,13 @@ def calculate_fit_level(readiness_score: dict) -> dict:
 def summarize_scored_match(item: dict, *, gap_mode: bool = False) -> str:
     requirement = item.get("jd_requirement", "") or item.get("requirement_text", "")
     names = item.get("matched_experience_names", []) or []
-    prefix = requirement.strip() or item.get("requirement_id", "未命名要求")
+    prefix = requirement.strip() or item.get("requirement_id", localized('未命名要求', 'Unnamed Requirement'))
     if gap_mode:
-        gap = item.get("gap", "") or "缺少更直接、可量化或场景贴合的证据。"
+        gap = item.get("gap", "") or localized('缺少更直接、可量化或场景贴合的证据。', 'Lacking more direct, quantifiable, or scenario-relevant evidence.')
         return f"{prefix}：{gap}"
     if names:
-        return f"{prefix}：已有证据来自 {'、'.join(names[:2])}"
-    return f"{prefix}：已有相关证据覆盖"
+        return (f"{prefix}: Evidence comes from {', '.join(names[:2])}" if is_english() else f"{prefix}：已有证据来自 {'、'.join(names[:2])}")
+    return (f"{prefix}: Relevant evidence already covered" if is_english() else f"{prefix}：已有相关证据覆盖")
 
 
 def deterministic_top_matches(readiness_score: dict, limit: int = 3) -> list[str]:
@@ -1317,11 +1342,11 @@ def deterministic_top_gaps(readiness_score: dict, limit: int = 3) -> list[str]:
 def default_fit_summary(fit_metrics: dict) -> str:
     score = round(fit_metrics.get("overall_readiness_score", 0) * 100)
     labels = {
-        "high_fit": "证据覆盖很强，可以直接围绕该岗位组织简历表达。",
-        "good_fit": "大部分核心要求已有证据覆盖，但仍有少数缺口值得补充。",
-        "partial_fit": "存在可迁移证据，但关键要求仍需要更多直接材料支持。",
-        "weak_fit": "当前经历库只有有限证据覆盖，建议谨慎投入并优先补充材料。",
-        "low_fit": "当前经历库难以支撑该 JD 的核心要求。",
+        "high_fit": localized('证据覆盖很强，可以直接围绕该岗位组织简历表达。', 'Strong evidence coverage; can directly organize resume content around the role.'),
+        "good_fit": localized('大部分核心要求已有证据覆盖，但仍有少数缺口值得补充。', 'Most core requirements have evidence coverage but some gaps remain worth supplementing.'),
+        "partial_fit": localized('存在可迁移证据，但关键要求仍需要更多直接材料支持。', 'Transferable evidence exists but key requirements still need more direct materials.'),
+        "weak_fit": localized('当前经历库只有有限证据覆盖，建议谨慎投入并优先补充材料。', 'Current experience database only offers limited evidence coverage; recommend cautious investment and prioritize adding materials.'),
+        "low_fit": localized('当前经历库难以支撑该 JD 的核心要求。', 'Current experience database insufficient to support core requirements of this JD.'),
     }
     return f"Readiness score {score}/100。{labels.get(fit_metrics.get('fit_level'), '')}"
 
@@ -1527,7 +1552,7 @@ def build_gap_followup_plan(match_result: dict) -> dict:
         if len(questions) >= MAX_QUESTIONS:
             break
 
-        requirement = match.get("jd_requirement", "\u8fd9\u9879\u5c97\u4f4d\u8981\u6c42")
+        requirement = match.get("jd_requirement", localized('这项岗位要求', 'This job requirement'))
         experience_names = match.get("matched_experience_names") or []
         experience_ids = match.get("matched_experience_ids") or []
         related_name = experience_names[0] if experience_names else ""
@@ -1545,6 +1570,18 @@ def build_gap_followup_plan(match_result: dict) -> dict:
                 f"\u53ef\u4ee5\u7b80\u5355\u8bf4\u80cc\u666f\u3001\u4f60\u505a\u4e86\u4ec0\u4e48\u3001\u7ed3\u679c\u5982\u4f55\u3002"
             )
 
+        if is_english():
+            if related_name:
+                question = (
+                    f'For "{related_name}", can you share a concrete example demonstrating '
+                    f'"{requirement}"? Focus on what you did and the outcome.'
+                )
+            else:
+                question = (
+                    f'Is there a real experience demonstrating "{requirement}"? '
+                    'Briefly describe the context, your actions, and the outcome.'
+                )
+
         questions.append(
             {
                 "id": f"fallback_q{index}",
@@ -1556,7 +1593,7 @@ def build_gap_followup_plan(match_result: dict) -> dict:
                 "related_experience_id": related_id,
                 "related_experience_name": related_name,
                 "question": question,
-                "why_ask": gap or "\u5f53\u524d\u68c0\u7d22\u7ed3\u679c\u4e2d\u8fd9\u9879\u8bc1\u636e\u4ecd\u4e0d\u5145\u5206\u3002",
+                "why_ask": gap or localized('当前检索结果中这项证据仍不充分。', 'This evidence is still insufficient in the current retrieval results.'),
                 "improvability": "medium",
                 "theoretical_improvement": {
                     "coverage_before": 0.0,
@@ -1614,6 +1651,7 @@ class WorkflowState:
     reviewed_answers: dict = field(default_factory=dict)
     interaction_log: list = field(default_factory=list)
     resume_markdown: str = ""
+    improvement_suggestions_markdown: str = ""
     branch_decisions: list = field(default_factory=list)
     memory_layers: dict = field(default_factory=dict)
     api_payload_manifest: dict = field(default_factory=dict)
@@ -1677,7 +1715,7 @@ class WorkflowState:
 def create_client_from_env() -> OpenAI:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise RuntimeError("没有找到 OPENAI_API_KEY，请先在环境变量中配置它。")
+        raise RuntimeError(localized('没有找到 OPENAI_API_KEY，请先在环境变量中配置它。', 'OPENAI_API_KEY not found, please configure it in environment variables first.'))
     return OpenAI(api_key=api_key, timeout=OPENAI_TIMEOUT_SECONDS)
 
 
@@ -1699,9 +1737,9 @@ def create_workflow_state(experience_text: str, jd_text: str) -> WorkflowState:
     """Create a workflow state from UI/API/CLI inputs."""
 
     if not experience_text:
-        raise ValueError("exp_bank.txt 还是空的。")
+        raise ValueError(localized('exp_bank.txt 还是空的。', 'exp_bank.txt is still empty.'))
     if not jd_text:
-        raise ValueError("sample_jd.txt 还是空的。")
+        raise ValueError(localized('sample_jd.txt 还是空的。', 'sample_jd.txt is still empty.'))
 
     return WorkflowState(experience_text=experience_text, jd_text=jd_text)
 
@@ -1770,7 +1808,16 @@ def run_jd_analysis_workflow(client: OpenAI, state: WorkflowState) -> WorkflowSt
         {"jd_text_chars": len(state.jd_text), "task_prompt": "task_s3_parse_jd.txt"},
         "This step must read the target JD once.",
     )
-    prompt = f"""
+    prompt = (f"""
+You are executing CariAgent Step 3: Decompose the target JD.
+Please complete structured analysis based only on the JD text and task instructions below; do not add requirements not appearing in the JD.
+
+Target JD:
+{state.jd_text}
+
+Task Instructions:
+{task_prompt}
+""" if is_english() else f"""
 你正在执行 CariAgent Step 3：拆解目标 JD。
 请只基于下面的 JD 原文和任务说明完成结构化分析，不要补充 JD 中没有出现的要求。
 
@@ -1779,7 +1826,7 @@ def run_jd_analysis_workflow(client: OpenAI, state: WorkflowState) -> WorkflowSt
 
 任务说明：
 {task_prompt}
-"""
+""")
 
     _, state.jd_analysis = ask_ai_for_json_once(
         client,
@@ -1800,9 +1847,9 @@ def run_retrieval_workflow(
 ) -> WorkflowState:
     """Step 3A + 3B: section parsing and section-aware RAG retrieval."""
     if state.experience_sections:
-        emit_progress(progress_callback, "Step 3A 跳过：复用已解析的经历库 section")
+        emit_progress(progress_callback, localized('Step 3A 跳过：复用已解析的经历库 section', 'Step 3A skipped: Reusing already parsed experience database sections'))
     else:
-        emit_progress(progress_callback, "Step 3A 开始：正在识别经历库 section...")
+        emit_progress(progress_callback, localized('Step 3A 开始：正在识别经历库 section...', 'Step 3A start: Identifying experience database sections...'))
         section_task_prompt = load_prompt("task_s2_parse_experience_sections.txt")
         state.remember_api_payload(
             "s3a_parse_experience_sections",
@@ -1812,7 +1859,16 @@ def run_retrieval_workflow(
             },
             "This step must read the raw experience bank once to create local sections.",
         )
-        section_prompt = f"""
+        section_prompt = (f"""
+You are executing CariAgent Step 3A: parsing the user’s full experience database into resume sections.
+Please retain original facts and source boundaries as much as possible; do not rewrite into final resume bullet points.
+
+User’s full experience database:
+{state.experience_text}
+
+Task instructions:
+{section_task_prompt}
+""" if is_english() else f"""
 你正在执行 CariAgent Step 3A：把同一位用户的完整经历库解析成简历 sections。
 请尽量保留原始事实和来源边界，不要改写成最终简历 bullet。
 
@@ -1821,7 +1877,7 @@ def run_retrieval_workflow(
 
 任务说明：
 {section_task_prompt}
-"""
+""")
 
         _, state.experience_sections = ask_ai_for_json_once(
             client,
@@ -1831,9 +1887,9 @@ def run_retrieval_workflow(
             call_name="s3a_parse_experience_sections",
         )
         save_json("01a_experience_sections.json", state.experience_sections)
-        emit_progress(progress_callback, "Step 3A 完成：AI 已将经历库划分为简历 section")
+        emit_progress(progress_callback, localized('Step 3A 完成：AI 已将经历库划分为简历 section', 'Step 3A complete: AI divided experience database into resume sections'))
 
-    emit_progress(progress_callback, "Step 3B 开始：正在执行 section-aware RAG 检索...")
+    emit_progress(progress_callback, localized('Step 3B 开始：正在执行 section-aware RAG 检索...', 'Step 3B start: Executing section-aware RAG retrieval...'))
     state.retrieval_result = retrieve_sectioned_task_unit_evidence(
         client,
         state.experience_sections,
@@ -1866,7 +1922,7 @@ def run_retrieval_workflow(
         "Local full retrieval result is saved; downstream API calls use selected evidence only.",
     )
     state.refresh_memory_layers()
-    emit_progress(progress_callback, "Step 3B 完成：已按 section 检索当前 JD 最相关的经历片段")
+    emit_progress(progress_callback, localized('Step 3B 完成：已按 section 检索当前 JD 最相关的经历片段', 'Step 3B complete: Retrieved the most relevant experience fragments by section for the current JD'))
     return state
 
 
@@ -1876,7 +1932,7 @@ def run_matching_workflow(
     progress_callback: Callable[[str], None] | None = None,
 ) -> WorkflowState:
     """Step 4 + 4B + 5 + 5B: structure evidence, match, score, explain fit."""
-    emit_progress(progress_callback, "Step 4 开始：正在把检索证据整理成 experience atoms...")
+    emit_progress(progress_callback, localized('Step 4 开始：正在把检索证据整理成 experience atoms...', 'Step 4 start: Organizing retrieved evidence into experience atoms...'))
     jd_context = build_compact_jd_context(state.jd_analysis)
     direct_context_sections = build_direct_context_sections_for_api(
         state.retrieval_result.get("direct_context_sections", [])
@@ -1915,9 +1971,9 @@ Task instructions:
         call_name="s4_atomize_selected_evidence",
     )
     save_json("02_experience_atoms.json", state.experience_atoms)
-    emit_progress(progress_callback, "Step 4 完成：AI 已拆解个人经历")
+    emit_progress(progress_callback, localized('Step 4 完成：AI 已拆解个人经历', 'Step 4 complete: AI decomposed personal experience'))
 
-    emit_progress(progress_callback, "Step 4B 开始：正在检查候选经历材料质量...")
+    emit_progress(progress_callback, localized('Step 4B 开始：正在检查候选经历材料质量...', 'Step 4B start: Checking candidate experience material quality...'))
     quality_payload = {
         "jd": jd_context,
         "selected_evidence_summary": build_selected_evidence_summary(state.retrieval_result),
@@ -1928,7 +1984,22 @@ Task instructions:
         quality_payload,
         "Quality audit uses evidence summaries and atoms, not full evidence text.",
     )
-    quality_prompt = f"""
+    quality_prompt = (f"""
+You are checking the input quality of retrieved evidence and experience atoms under the current JD.
+Please conservatively judge based on the provided compact context; do not fabricate missing information as facts.
+
+JD compact context:
+{to_prompt_json(jd_context)}
+
+Selected retrieved evidence summary:
+{to_prompt_json(quality_payload["selected_evidence_summary"])}
+
+Experience atoms:
+{to_prompt_json(quality_payload["experience_atoms"])}
+
+Task instructions:
+{load_prompt("task_s4c_input_quality_audit.txt")}
+""" if is_english() else f"""
 你正在检查当前 JD 下，已检索证据和 experience atoms 的输入质量。
 请基于已提供的 compact context 保守判断，不要把缺失信息补编成事实。
 
@@ -1943,7 +2014,7 @@ Experience atoms:
 
 Task instructions:
 {load_prompt("task_s4c_input_quality_audit.txt")}
-"""
+""")
     _, state.input_quality_audit = ask_ai_for_json_once(
         client,
         quality_prompt,
@@ -1952,9 +2023,9 @@ Task instructions:
         call_name="s4b_quality_audit",
     )
     save_json("02b_input_quality_audit.json", state.input_quality_audit)
-    emit_progress(progress_callback, "Step 4B 完成：AI 已完成经历库质量检查")
+    emit_progress(progress_callback, localized('Step 4B 完成：AI 已完成经历库质量检查', 'Step 4B complete: AI finished experience database quality check'))
 
-    emit_progress(progress_callback, "Step 5 开始：正在匹配 JD 与 experience atoms...")
+    emit_progress(progress_callback, localized('Step 5 开始：正在匹配 JD 与 experience atoms...', 'Step 5 start: Matching JD with experience atoms...'))
     matching_payload = {
         "jd": jd_context,
         "experience_atoms": build_atoms_for_matching_context(state.experience_atoms),
@@ -1964,7 +2035,19 @@ Task instructions:
         matching_payload,
         "Step 5 matches JD against atoms; raw chunks stay local unless needed for audit.",
     )
-    match_prompt = f"""
+    match_prompt = (f"""
+You are executing CariAgent Step 5: Matching JD with experience atoms.
+Please only use facts and provenance in atoms; do not borrow evidence across experiences.
+
+JD compact context:
+{to_prompt_json(jd_context)}
+
+Experience atoms:
+{to_prompt_json(matching_payload["experience_atoms"])}
+
+Task instructions:
+{load_prompt("task_s5_match_experience.txt")}
+""" if is_english() else f"""
 你正在执行 CariAgent Step 5：匹配 JD 与 experience atoms。
 请只使用 atoms 中已有事实和 provenance，不要跨经历借证据。
 
@@ -1976,7 +2059,7 @@ Experience atoms:
 
 Task instructions:
 {load_prompt("task_s5_match_experience.txt")}
-"""
+""")
     _, state.match_result = ask_ai_for_json_once(
         client,
         match_prompt,
@@ -1985,9 +2068,9 @@ Task instructions:
         call_name="s5_match_jd_to_atoms",
     )
     save_json("03_match_result.json", state.match_result)
-    emit_progress(progress_callback, "Step 5 完成：AI 已完成匹配")
+    emit_progress(progress_callback, localized('Step 5 完成：AI 已完成匹配', 'Step 5 complete: AI finished matching'))
 
-    emit_progress(progress_callback, "Step 5B 开始：正在计算 readiness 并生成匹配判断...")
+    emit_progress(progress_callback, localized('Step 5B 开始：正在计算 readiness 并生成匹配判断...', 'Step 5B start: Calculating readiness and generating match judgement...'))
     state.readiness_score = calculate_readiness_score(
         state.match_result,
         state.experience_atoms,
@@ -2006,7 +2089,18 @@ Task instructions:
         fit_payload,
         "Fit verdict explains the calculated readiness result; it does not recalculate score.",
     )
-    fit_verdict_prompt = f"""
+    fit_verdict_prompt = (f"""
+Please explain the job fit based on the system-calculated fit metrics.
+Do not recalculate scores or extend judgments beyond quantitative results.
+
+{to_prompt_json(state.fit_metrics)}
+
+System-computed scored matches:
+
+{to_prompt_json(fit_payload["scored_matches"])}
+
+{load_prompt("task_s5b_explain_fit_verdict.txt")}
+""" if is_english() else f"""
 请根据系统已经计算出的 fit metrics 解释岗位适配情况。
 不要重新计算分数，也不要脱离量化结果自行扩大判断。
 
@@ -2017,7 +2111,7 @@ Task instructions:
 {to_prompt_json(fit_payload["scored_matches"])}
 
 {load_prompt("task_s5b_explain_fit_verdict.txt")}
-"""
+""")
     _, state.fit_verdict = ask_ai_for_json_once(
         client,
         fit_verdict_prompt,
@@ -2031,7 +2125,7 @@ Task instructions:
         state.readiness_score,
     )
     save_json("03c_fit_verdict.json", state.fit_verdict)
-    emit_progress(progress_callback, "Step 5B 完成：已生成匹配判断与继续/谨慎建议")
+    emit_progress(progress_callback, localized('Step 5B 完成：已生成匹配判断与继续/谨慎建议', 'Step 5B complete: Generated match judgement and continuation/caution suggestions'))
     state.refresh_memory_layers()
     return state
 
@@ -2135,7 +2229,7 @@ def run_followup_interaction_workflow(
             f"Readiness score {estimated_readiness_score:.3f} >= {READINESS_THRESHOLD}.",
         )
         output_fn(
-            f"\n当前匹配度较高（readiness score: {estimated_readiness_score:.3f}），本轮不再额外追问，直接生成简历草稿。"
+            (f"\nCurrent readiness is high (readiness score: {estimated_readiness_score:.3f}), no further follow-up this round, generating resume draft directly." if is_english() else f"\n当前匹配度较高（readiness score: {estimated_readiness_score:.3f}），本轮不再额外追问，直接生成简历草稿。")
         )
         state.reviewed_answers = {
             "reviewed_answers": [],
@@ -2163,8 +2257,8 @@ def run_followup_interaction_workflow(
             f"Readiness score {estimated_readiness_score:.3f} < {READINESS_THRESHOLD}.",
         )
 
-    output_fn("\n下面进入用户补充环节。")
-    output_fn("可自然回答；不知道可说 pass；想结束可输入 done / 结束 / 先生成。")
+    output_fn(localized('\n下面进入用户补充环节。', '\nNow entering user supplementation phase.'))
+    output_fn(localized('可自然回答；不知道可说 pass；想结束可输入 done / 结束 / 先生成。', 'Answer naturally here; say pass if you don’t know; input done / end / generate first to finish.'))
 
     def ask_topic_question(question: dict, topic: dict) -> tuple[dict | None, str]:
         nonlocal stop_reason
@@ -2176,7 +2270,7 @@ def run_followup_interaction_workflow(
             return None, "stop"
 
         output_fn("\n" + question["question"])
-        answer_text = input_fn("你的回答：").strip()
+        answer_text = input_fn(localized('你的回答：', 'Your answer:')).strip()
         normalized_answer = normalize_user_control_text(answer_text)
         if normalized_answer in EXIT_WORDS:
             stop_reason = "stopped_by_user"
@@ -2222,7 +2316,7 @@ def run_followup_interaction_workflow(
         if reviewed_item.get("status") == "off_topic" and topic["clarification_budget"] > 0:
             topic["clarification_budget"] -= 1
             output_fn("\n" + reviewed_item["clarification_prompt"])
-            second_answer_text = input_fn("请再补充一次：").strip()
+            second_answer_text = input_fn(localized('请再补充一次：', 'Please supplement once more:')).strip()
             normalized_second_answer = normalize_user_control_text(second_answer_text)
             if normalized_second_answer in EXIT_WORDS:
                 stop_reason = "stopped_by_user"
@@ -2398,7 +2492,8 @@ def run_resume_generation_workflow(client: OpenAI, state: WorkflowState) -> Work
     )
     resume_prompt = f"""
 You are continuing the same CariAgent workflow for the same user.
-The final answer must be a resume draft, not a JD matching analysis or intermediate report.
+Return a structured object with separate resume_markdown and improvement_suggestions_markdown fields.
+The resume_markdown field must contain only the resume, without advice, analysis, or improvement notes.
 Selected evidence chunks and reviewed user answers are the source of truth.
 Atoms and match result are annotations.
 Do not borrow evidence across source experiences.
@@ -2410,13 +2505,17 @@ Task instructions:
 {load_prompt("task_s8_generate_resume.txt")}
 """
 
-    _, state.resume_markdown = ask_ai_for_text_once(
+    _, output = ask_ai_for_json_once(
         client,
         resume_prompt,
         STEP_MODELS["s8"],
+        "resume_output",
         call_name="s8_generate_resume",
     )
+    state.resume_markdown = output["resume_markdown"]
+    state.improvement_suggestions_markdown = output["improvement_suggestions_markdown"]
     save_markdown("result.md", state.resume_markdown)
+    save_markdown("improvement_suggestions.md", state.improvement_suggestions_markdown)
     state.refresh_memory_layers()
     return state
 
@@ -2446,11 +2545,11 @@ def run_full_cli_workflow() -> WorkflowState:
     def cli_progress(message: str) -> None:
         print(message, flush=True)
 
-    print("Step 1 完成：已读取个人经历库")
-    print("Step 2 完成：已读取目标 JD")
+    print(localized('Step 1 完成：已读取个人经历库', 'Step 1 complete: Personal experience database read'))
+    print(localized('Step 2 完成：已读取目标 JD', 'Step 2 complete: Target JD read'))
 
     state = run_jd_analysis_workflow(client, state)
-    print("Step 3 完成：AI 已拆解 JD")
+    print(localized('Step 3 完成：AI 已拆解 JD', 'Step 3 complete: AI decomposed JD'))
 
     state = run_retrieval_workflow(client, state, progress_callback=cli_progress)
 
@@ -2463,11 +2562,11 @@ def run_full_cli_workflow() -> WorkflowState:
             state.fit_verdict.get("user_message", ""),
         )
         print("\n" + state.fit_verdict.get("user_message", ""))
-        continue_choice = input("仍要继续吗？输入 y 继续，其他任意输入结束：").strip().lower()
+        continue_choice = input(localized('仍要继续吗？输入 y 继续，其他任意输入结束：', 'Continue? Input y to continue, any other input to end:')).strip().lower()
         if continue_choice != "y":
             state.record_branch("fit_verdict", "stop", "User chose not to continue.")
             save_workflow_trace(state)
-            raise SystemExit("已根据用户选择结束本次流程。")
+            raise SystemExit(localized('已根据用户选择结束本次流程。', 'This session ended per user choice.'))
     else:
         state.record_branch(
             "fit_verdict",
@@ -2475,20 +2574,21 @@ def run_full_cli_workflow() -> WorkflowState:
             state.fit_verdict.get("recommendation", ""),
         )
 
-    print("Step 6 开始：正在根据匹配缺口生成追问计划...", flush=True)
+    print(localized('Step 6 开始：正在根据匹配缺口生成追问计划...', 'Step 6 start: Generating follow-up plan based on match gaps...'), flush=True)
     state = run_followup_planning_workflow(state)
-    print("Step 6 完成：追问计划已生成")
+    print(localized('Step 6 完成：追问计划已生成', 'Step 6 complete: Follow-up plan generated'))
 
     state = run_followup_interaction_workflow(client, state)
     followup_stop_reason = state.reviewed_answers.get("stop_reason", "")
     if followup_stop_reason in {"readiness_threshold_reached", "no_candidate_questions"}:
-        print("Step 7 跳过：本轮未进入用户补充问答")
+        print(localized('Step 7 跳过：本轮未进入用户补充问答', 'Step 7 skipped: No user supplementation Q&A this round'))
     else:
-        print("Step 7 完成：AI 已理解你的补充回答")
+        print(localized('Step 7 完成：AI 已理解你的补充回答', 'Step 7 complete: AI understood your supplementary answers'))
 
     state = run_resume_generation_workflow(client, state)
-    print("Step 8 完成：已生成最终简历内容")
-    print(f"结果已保存到：{OUTPUT_DIR / 'result.md'}")
+    print(localized('Step 8 完成：已生成最终简历内容', 'Step 8 complete: Final resume content generated'))
+    print((f"Result saved to: {OUTPUT_DIR / 'result.md'}" if is_english() else f"结果已保存到：{OUTPUT_DIR / 'result.md'}"))
+    print((f"Improvement suggestions saved separately to: {OUTPUT_DIR / 'improvement_suggestions.md'}" if is_english() else f"优化建议单独保存到：{OUTPUT_DIR / 'improvement_suggestions.md'}"))
 
     save_workflow_trace(state)
     return state

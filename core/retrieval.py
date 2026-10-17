@@ -5,6 +5,11 @@ from dataclasses import dataclass
 import math
 import re
 
+try:
+    from .localization import is_english, localized
+except ImportError:
+    from localization import is_english, localized
+
 from openai import OpenAI
 
 
@@ -102,7 +107,8 @@ def infer_experience_metadata(cleaned_text: str, start: int, end: int) -> dict:
 
     best = None
     best_score = 0
-    for candidate in EXPERIENCE_PATTERNS:
+    # English sources must not inherit hardcoded Chinese demo identities.
+    for candidate in ([] if is_english() else EXPERIENCE_PATTERNS):
         score = sum(1 for keyword in candidate["keywords"] if keyword.lower() in context.lower())
         if score > best_score:
             best = candidate
@@ -116,7 +122,7 @@ def infer_experience_metadata(cleaned_text: str, start: int, end: int) -> dict:
         }
 
     return {
-        "experience_title": "未识别来源经历",
+        "experience_title": localized('未识别来源经历', 'Unrecognized source experience'),
         "company_or_project": "",
         "section_type": "unknown",
     }
@@ -676,11 +682,15 @@ def render_evidence_map_context(evidence_map: list[dict]) -> str:
         blocks.append(f"{section_line}JD task unit: {entry['task_unit']}")
         for chunk in chunks:
             blocks.append(
-                f"Evidence {evidence_index} source: {chunk.get('experience_title', '未识别来源经历')}\n"
+                (f"Evidence {evidence_index} source: {chunk.get('experience_title', 'Unrecognized source experience')}\n"
+          f"Company/project: {chunk.get('company_or_project', '')}\n"
+          f"Section type: {chunk.get('section_type', '')}\n"
+          f"Evidence summary: {chunk['evidence_summary']}\n"
+          f"Evidence text:\n{chunk['text']}" if is_english() else f"Evidence {evidence_index} source: {chunk.get('experience_title', '未识别来源经历')}\n"
                 f"Company/project: {chunk.get('company_or_project', '')}\n"
                 f"Section type: {chunk.get('section_type', '')}\n"
                 f"Evidence summary: {chunk['evidence_summary']}\n"
-                f"Evidence text:\n{chunk['text']}"
+                f"Evidence text:\n{chunk['text']}")
             )
             evidence_index += 1
     return "\n\n".join(blocks)
@@ -688,6 +698,6 @@ def render_evidence_map_context(evidence_map: list[dict]) -> str:
 
 def render_selected_chunks(selected_chunks: list[dict]) -> str:
     return "\n\n".join(
-        f"Evidence {index} source: {chunk.get('experience_title', '未识别来源经历')}\n{chunk['text']}"
+        (f"Evidence {index} source: {chunk.get('experience_title', 'Unrecognized source experience')}\n{chunk['text']}" if is_english() else f"Evidence {index} source: {chunk.get('experience_title', '未识别来源经历')}\n{chunk['text']}")
         for index, chunk in enumerate(selected_chunks, start=1)
     )

@@ -1,0 +1,54 @@
+You are performing Step 8: Generate “Resume Draft.”
+
+The goal at this stage is not perfect formatting, but to facilitate troubleshooting RAG, matching, and experience weighting issues. Therefore, please favor full output and display all the main matched work/internship experiences and project experiences.
+
+The current context will include selected retrieved evidence chunks, experience atoms, match results, and supplemental user follow-up questions. Among these, selected retrieved evidence chunks and user follow-up answers are factual sources; experience atoms and match results are structured annotations and judgments, not new facts that can be used independently of the original text.
+
+Output requirements:
+1. Output a JSON object that conforms to the schema: resume_markdown contains the Markdown resume body; improvement_suggestions_markdown contains separate optimization suggestions. Do not output a JD matching analysis report.
+2. Do not repeat JD requirements item by item.
+3. Work/internship experiences must be displayed as separate paragraphs; even if project experiences match better, do not omit authentic work/internship experiences.
+4. Project experiences should also be fully displayed but should not completely overshadow work/internship experiences.
+5. Each experience paragraph should only use facts belonging to that source_experience / display_name and follow-up supplements that explicitly belong_to_experience_name matching this experience.
+6. Do not borrow evidence across experiences. Do not write information about a certain company/organization/project into another experience paragraph, nor write project experience into an internship experience.
+7. Do not output internal ID, chunk_id, score, or retrieval metadata.
+8. Do not fabricate quantified achievements if results are unclear; prefer cautious expressions such as “supported, formed, used, helped, provided basis for...”
+9. If an experience's evidence is weak, it can be retained but expressed with more conservative bullet points.
+10. If experience atoms/match results conflict with the original selected evidence chunks, prioritize the original selected evidence chunks and user follow-up answers.
+11. Do not invent information that the user has not provided; you may use cautious wording but must not fabricate data, duties, or results.
+12. Work/internship experiences must be merged by real company/organization + role + time; do not split into multiple paragraphs by atom, task type, or display_name.
+13. Different tasks under the same company/organization + role + time should be merged under the same experience with separate bullet points.
+14. If multiple relevant atoms exist under the same company, consolidate bullets only; do not split into multiple experience titles such as “Weekly Report Project,” “Monthly Report Project,” or “Special Analysis Project.”
+15. If the original text has explicit company names, do not rewrite them as “a company,” “a beauty company,” or other vague references.
+
+The fixed structure for the resume_markdown field (include only the following resume sections, no suggestions, analyses, or explanations):
+
+# Resume Draft
+
+## Education
+Output school, major, time period, GPA/awards/relevant courses according to the education background in the experience database. Do not fabricate school, degree, time period, or grades. If education information is insufficient, write “Education information pending.”
+
+## Work / Internship Experience
+List all matched work or internship experiences by real company/organization + role + time. Each company/organization should appear only once. Each experience paragraph includes:
+**Company/Organization | Role | Time (if known)**
+- 2-4 bullet points.
+
+## Project Experience
+List all matched project experiences. Each paragraph includes:
+**Project Name | Tools/Methods (if applicable)**
+- 2-4 bullet points.
+
+## Skills
+Divide into two subsections:
+**Hard Skills**: Tools, programming languages, data analysis methods, platforms, software, etc.
+**Soft Skills**: Communication and collaboration, project management, business understanding, structured expression, problem decomposition, etc. Must come from experience evidence; do not add vague buzzwords.
+
+The above is the full content of resume_markdown, ending at skills.
+
+The improvement_suggestions_markdown field outputs optimization suggestions separately and must never be appended to resume_markdown:
+Brief explanation:
+- Which experiences are emphasized,
+- Which experience evidences are weak,
+- Which abilities still require user supplementation.
+
+Language style: English, clear, factual, and cautious.
