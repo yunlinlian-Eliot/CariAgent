@@ -1,0 +1,24 @@
+digraph system {
+graph [rankdir=TB,bgcolor="transparent",pad="0.2",nodesep="0.3",ranksep="0.3"];
+node [shape=box,style="rounded,filled",fillcolor="#F0F6FA",color="#A4BEC9",fontname="Noto Sans CJK SC",fontsize=11,margin="0.12,0.1"];
+edge [color="#527989",fontname="Noto Sans CJK SC",fontsize=9,arrowsize=.7];
+experience [label="用户经历库"];
+jd [label="目标 JD"];
+sections [label="Section / 经历记录解析\n保留公司、角色、时间和来源"];
+parse [label="JD 结构化解析\n岗位目标 / 职责 / KSA"];
+chunks [label="按经历记录分块\n来源信息随块保留"];
+queries [label="中等粒度任务 Query"];
+retrieve [label="Embedding + 关键词混合排序\n按经历组配额召回"];
+atoms [label="选中原文 → Experience Atoms\nSTAR / KSA 标注，不新增事实"];
+match [label="质量检查与 JD 匹配"];
+score [label="程序计算覆盖度和适配等级\n模型解释结果"];
+follow [label="按缺口生成追问计划\n用户回答 → 理解及归属审查"];
+resume [label="最终生成\n证据原文 + 有效补充为事实依据",fillcolor="#DDEEF5"];
+output [label="独立字段：正文 / 优化建议"];
+experience -> sections -> chunks -> retrieve;
+jd -> parse -> queries -> retrieve;
+retrieve -> atoms -> match -> score -> follow -> resume -> output;
+sections -> resume [label="教育 / 技能等直接上下文",style=dashed];
+retrieve -> resume [label="选中原文证据",style=dashed];
+score -> resume [label="可不补充直接生成",style=dashed];
+}
