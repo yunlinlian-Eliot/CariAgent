@@ -1,0 +1,43 @@
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { font-family: 'Noto Sans CJK SC','Microsoft YaHei',sans-serif; color:#20323d; font-size:14px; line-height:1.8; max-width:1040px; padding:48px; margin:auto; }
+h1 { font-size:25px; color:#0a6379; line-height:1.5; margin-top:1.7em; }
+h2 { font-size:19px; color:#254e5c; line-height:1.5; margin-top:1.5em; }
+h3 { font-size:16px; }
+p { margin:.65em 0; }
+a {color:#0a6379; text-decoration:none; overflow-wrap:anywhere;}
+header { border-bottom:3px solid #0e7890; padding-bottom:20px; }
+header h1 { font-size:32px; margin:.4em 0; }
+.subtitle { font-size:17px; color:#526c77; }
+nav#TOC { background:#f2f7f9; padding:15px 28px; margin:24px 0; }
+nav#TOC ul { padding-left:20px; }
+nav#TOC li { margin:.12em 0; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:16px 0; table-layout:fixed; }
+th,td { border:1px solid #d7e2e7; padding:8px; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+th { background:#eaf3f6; color:#174e60; }
+tr:nth-child(even) td {background:#f8fafb;}
+code { font-family:'DejaVu Sans Mono',monospace; font-size:.9em; overflow-wrap:anywhere; }
+img { display:block; max-width:100%; max-height:740px; margin:18px auto; }
+figcaption { text-align:center; color:#61727b; font-size:12px; }
+@page {size:A4; margin:16mm 14mm 17mm;}
+@media print {
+ body {max-width:none; padding:0; font-size:10px; line-height:1.65;}
+ header {padding-bottom:10px;}
+ header h1 {font-size:25px;}
+ h1 {font-size:18px; margin-top:1.2em; break-after:avoid;}
+ h2 {font-size:13px; break-after:avoid;}
+ h3 {font-size:11px; break-after:avoid;}
+ table {font-size:8.7px; line-height:1.6; margin:10px 0;}
+ th,td {padding:5px;}
+ tr {break-inside:avoid;}
+ thead {display:table-header-group;}
+ img {max-height:185mm; width:auto;}
+ figure {break-inside:avoid; margin:12px 0;}
+ nav#TOC {break-after:page; font-size:10px;}
+ #产品演进与关键技术决策 {break-before:page;}
+}
+figure svg { display:block; max-width:100%; margin:12px auto; }
+@media print {
+ figure svg { height:175mm; width:auto; max-width:100%; }
+ #产品演进与关键技术决策 {break-before:auto;}
+}

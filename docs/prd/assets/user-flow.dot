@@ -1,0 +1,26 @@
+digraph flow {
+graph [rankdir=TB, bgcolor="transparent", pad="0.2", nodesep="0.24", ranksep="0.34"];
+node [shape=box,style="rounded,filled",fillcolor="#F0F6FA",color="#A4BEC9",fontname="Noto Sans CJK SC",fontsize=12,margin="0.16,0.11"];
+edge [color="#527989",fontname="Noto Sans CJK SC",fontsize=10,arrowsize=.7];
+input [label="输入经历库与目标 JD"];
+analysis [label="JD 拆解 → 经历检索 → 匹配与缺口分析"];
+summary [label="查看匹配摘要与证据"];
+choice [shape=diamond,label="是否补充？",fillcolor="#E3F3EF"];
+question [label="显示当前高价值追问"];
+answer [label="用户提交回答"];
+review [label="审查补充事实及经历归属"];
+next [shape=diamond,label="继续回答？",fillcolor="#E3F3EF"];
+generate [label="生成简历正文与独立优化建议",fillcolor="#DDEEF5"];
+view [label="分别查看正文与建议"];
+export [label="下载 Markdown / Word\n仅包含简历正文"];
+input -> analysis -> summary -> choice;
+choice -> question [label="有问题，愿意回答"];
+choice -> generate [label="无问题 / 直接生成"];
+question -> answer -> review;
+question -> next [label="跳过当前问题"];
+review -> generate [label="结束补充，生成简历",color="#0E7890",penwidth=2];
+review -> next [label="继续补充"];
+next -> question [label="还有问题"];
+next -> generate [label="不再回答 / 已完成"];
+generate -> view -> export;
+}

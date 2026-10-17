@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CariAgent 产品需求文档</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { font-family: 'Noto Sans CJK SC','Microsoft YaHei',sans-serif; color:#20323d; font-size:14px; line-height:1.8; max-width:1040px; padding:48px; margin:auto; }
+h1 { font-size:25px; color:#0a6379; line-height:1.5; margin-top:1.7em; }
+h2 { font-size:19px; color:#254e5c; line-height:1.5; margin-top:1.5em; }
+h3 { font-size:16px; }
+p { margin:.65em 0; }
+a {color:#0a6379; text-decoration:none; overflow-wrap:anywhere;}
+header { border-bottom:3px solid #0e7890; padding-bottom:20px; }
+header h1 { font-size:32px; margin:.4em 0; }
+.subtitle { font-size:17px; color:#526c77; }
+nav#TOC { background:#f2f7f9; padding:15px 28px; margin:24px 0; }
+nav#TOC ul { padding-left:20px; }
+nav#TOC li { margin:.12em 0; }
+table { border-collapse:collapse; width:100%; font-size:12px; margin:16px 0; table-layout:fixed; }
+th,td { border:1px solid #d7e2e7; padding:8px; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+th { background:#eaf3f6; color:#174e60; }
+tr:nth-child(even) td {background:#f8fafb;}
+code { font-family:'DejaVu Sans Mono',monospace; font-size:.9em; overflow-wrap:anywhere; }
+img { display:block; max-width:100%; max-height:740px; margin:18px auto; }
+figcaption { text-align:center; color:#61727b; font-size:12px; }
+@page {size:A4; margin:16mm 14mm 17mm;}
+@media print {
+body {max-width:none; padding:0; font-size:10px; line-height:1.65;}
+header {padding-bottom:10px;}
+header h1 {font-size:25px;}
+h1 {font-size:18px; margin-top:1.2em; break-after:avoid;}
+h2 {font-size:13px; break-after:avoid;}
+h3 {font-size:11px; break-after:avoid;}
+table {font-size:8.7px; line-height:1.6; margin:10px 0;}
+th,td {padding:5px;}
+tr {break-inside:avoid;}
+thead {display:table-header-group;}
+img {max-height:185mm; width:auto;}
+figure {break-inside:avoid; margin:12px 0;}
+nav#TOC {break-after:page; font-size:10px;}
+#产品演进与关键技术决策 {break-before:page;}
+}
+figure svg { display:block; max-width:100%; margin:12px auto; }
+@media print {
+figure svg { height:175mm; width:auto; max-width:100%; }
+#产品演进与关键技术决策 {break-before:auto;}
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CariAgent 产品需求文档</h1>
+<p class="subtitle">v0.4｜产品需求、关键技术决策与迭代记录</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#文档概览" id="toc-文档概览">1. 文档概览</a></li>
+<li><a href="#背景用户与产品目标" id="toc-背景用户与产品目标">2.
+背景、用户与产品目标</a>
+<ul>
+<li><a href="#问题定义" id="toc-问题定义">2.1 问题定义</a></li>
+<li><a href="#目标用户与核心场景" id="toc-目标用户与核心场景">2.2
+目标用户与核心场景</a></li>
+<li><a href="#目标与边界" id="toc-目标与边界">2.3 目标与边界</a></li>
+</ul></li>
+<li><a href="#当前能力与版本范围" id="toc-当前能力与版本范围">3.
+当前能力与版本范围</a></li>
+<li><a href="#产品流程与交互" id="toc-产品流程与交互">4.
+产品流程与交互</a>
+<ul>
+<li><a href="#用户主流程" id="toc-用户主流程">4.1 用户主流程</a></li>
+<li><a href="#系统处理流程" id="toc-系统处理流程">4.2
+系统处理流程</a></li>
+<li><a href="#网页页面与关键动作" id="toc-网页页面与关键动作">4.3
+网页页面与关键动作</a></li>
+<li><a href="#关键异常处理" id="toc-关键异常处理">4.4
+关键异常处理</a></li>
+</ul></li>
+<li><a href="#详细功能需求" id="toc-详细功能需求">5.
+详细功能需求</a></li>
+<li><a href="#ai-行为评分与追问规则" id="toc-ai-行为评分与追问规则">6.
+AI 行为、评分与追问规则</a>
+<ul>
+<li><a href="#事实与证据归属" id="toc-事实与证据归属">6.1
+事实与证据归属</a></li>
+<li><a href="#检索规则与实现边界" id="toc-检索规则与实现边界">6.2
+检索规则与实现边界</a></li>
+<li><a href="#证据覆盖度分数" id="toc-证据覆盖度分数">6.3
+证据覆盖度分数</a></li>
+<li><a href="#human-in-the-loop" id="toc-human-in-the-loop">6.4
+Human-in-the-loop</a></li>
+</ul></li>
+<li><a href="#架构状态与非功能要求" id="toc-架构状态与非功能要求">7.
+架构、状态与非功能要求</a>
+<ul>
+<li><a href="#状态与模块" id="toc-状态与模块">7.1 状态与模块</a></li>
+<li><a href="#质量与运行要求" id="toc-质量与运行要求">7.2
+质量与运行要求</a></li>
+</ul></li>
+<li><a href="#产品演进与关键技术决策" id="toc-产品演进与关键技术决策">8.
+产品演进与关键技术决策</a>
+<ul>
+<li><a href="#明确暂缓的技术方向" id="toc-明确暂缓的技术方向">8.1
+明确暂缓的技术方向</a></li>
+</ul></li>
+<li><a href="#验收测试与效果评估" id="toc-验收测试与效果评估">9.
+验收、测试与效果评估</a>
+<ul>
+<li><a href="#核心验收场景" id="toc-核心验收场景">9.1
+核心验收场景</a></li>
+<li><a href="#已有验证证据" id="toc-已有验证证据">9.2
+已有验证证据</a></li>
+<li><a href="#后续测量口径" id="toc-后续测量口径">9.3
+后续测量口径</a></li>
+</ul></li>
+<li><a href="#发布已知问题与后续安排" id="toc-发布已知问题与后续安排">10. 发布、已知问题与后续安排</a>
+<ul>
+<li><a href="#发布基线" id="toc-发布基线">10.1 发布基线</a></li>
+<li><a href="#当前重点问题" id="toc-当前重点问题">10.2
+当前重点问题</a></li>
+<li><a href="#下一轮立项原则" id="toc-下一轮立项原则">10.3
+下一轮立项原则</a></li>
+</ul></li>
+<li><a href="#附录-a材料与证据索引" id="toc-附录-a材料与证据索引">附录
+A：材料与证据索引</a></li>
+<li><a href="#附录-b文档维护规则" id="toc-附录-b文档维护规则">附录
+B：文档维护规则</a></li>
+</ul>
+</nav>
+<h1 id="文档概览">1. 文档概览</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>产品</td>
+<td>CariAgent：基于真实经历与目标 JD 的 AI 简历定制助手</td>
+</tr>
+<tr class="even">
+<td>文档版本</td>
+<td>v0.4；这是文档版本，不代表应用另行发布了 v0.4</td>
+</tr>
+<tr class="odd">
+<td>更新日期</td>
+<td>2026 年 10 月 17 日</td>
+</tr>
+<tr class="even">
+<td>编写方式</td>
+<td>根据历史 PRD、研发日志、设计说明、当前代码及测试记录回溯整理</td>
+</tr>
+<tr class="odd">
+<td>当前形态</td>
+<td>Streamlit 网页 MVP，保留 CLI；中英文独立启动入口，共享核心流程</td>
+</tr>
+<tr class="even">
+<td>状态依据</td>
+<td>已实现内容以当前仓库为准；历史决定保留其阶段背景；未验证收益不记为实测成果</td>
+</tr>
+</tbody>
+</table>
+<p>本文件用于明确产品目标、交互与业务规则、验收条件，并集中记录关键研发取舍。当前代码核对基于
+<code>english-app</code> 分支提交
+<code>138ed53</code>。用户已反馈创建英文线上应用，但未提供可复核网址，线上验收不在本文件中标记为通过。</p>
+<h1 id="背景用户与产品目标">2. 背景、用户与产品目标</h1>
+<h2 id="问题定义">2.1 问题定义</h2>
+<p>求职者通常需要针对不同岗位反复挑选和改写经历，而一份现有简历并不等于其完整经历。原始材料又常有口语化、重复、细节遗漏等问题。直接让大模型生成简历，可能遗漏相关证据、夸大结果，或把不同经历的事实混用。</p>
+<p>CariAgent 将简历定制拆成一条可检查的证据链：</p>
+<p><strong>理解岗位 → 找到证据 → 判断覆盖与缺口 → 用户补充 →
+组织简历。</strong></p>
+<h2 id="目标用户与核心场景">2.2 目标用户与核心场景</h2>
+<p>当前优先面向需要针对具体 JD
+定制简历的学生与早期职业求职者。跨方向求职者也是潜在用户，但资深复合型人才的专门适配尚未验证。</p>
+<p>典型场景：用户持有多段实习、项目和校园经历，为某个目标岗位筛选最相关事实；系统识别可补充的信息，用户选择回答或跳过，最终得到可继续编辑的简历草稿。</p>
+<p>用户及问题依据主要来自作者真实求职流程、自测和少量试用反馈，不等同于完成了规模化用户研究。</p>
+<h2 id="目标与边界">2.3 目标与边界</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>目标</th>
+<th>产品要求</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>针对岗位选择经历</td>
+<td>检索依据来自目标 JD，避免只做通用润色</td>
+</tr>
+<tr class="even">
+<td>保持事实准确</td>
+<td>事实可归属到原始经历或用户补充，不编造结果、不跨经历借证据</td>
+</tr>
+<tr class="odd">
+<td>支持用户参与</td>
+<td>用户可理解缺口、回答或跳过，并自主结束补充</td>
+</tr>
+<tr class="even">
+<td>交付可使用草稿</td>
+<td>简历正文与优化建议独立展示，下载仅含正文</td>
+</tr>
+<tr class="odd">
+<td>提供英文使用路径</td>
+<td>英文界面、提示词、追问、生成与导出使用一致语言</td>
+</tr>
+</tbody>
+</table>
+<p>当前不包含：自动搜索并投递岗位、账号与支付系统、跨会话长期事实库、生产级多租户隔离、OCR/视觉解析、PDF
+精排版、岗位录用预测，以及已经完成的 LangGraph 多 Agent 架构。</p>
+<h1 id="当前能力与版本范围">3. 当前能力与版本范围</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>模块</th>
+<th>当前交付</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>输入</td>
+<td>文本编辑；TXT、Markdown、DOCX、文本型 PDF
+内容提取；内置虚拟示例</td>
+</tr>
+<tr class="even">
+<td>JD 理解</td>
+<td>岗位目标、职责、KSA、基础条件与关键词结构化</td>
+</tr>
+<tr class="odd">
+<td>证据处理</td>
+<td>Section 与单段经历解析、混合检索、来源信息、Experience Atoms</td>
+</tr>
+<tr class="even">
+<td>匹配</td>
+<td>材料质量检查、要求覆盖判断、程序评分、适配解释</td>
+</tr>
+<tr class="odd">
+<td>用户补充</td>
+<td>网页逐题回答、跳过、查看提问原因、直接生成</td>
+</tr>
+<tr class="even">
+<td>输出</td>
+<td>Markdown 简历正文、独立优化建议、Markdown / DOCX 下载</td>
+</tr>
+<tr class="odd">
+<td>语言</td>
+<td>中文 <code>ui/app.py</code>；英文
+<code>ui/app_en.py</code>，分别运行或部署</td>
+</tr>
+<tr class="even">
+<td>研发诊断</td>
+<td>API 调用元数据、工作流 trace、可选中间 JSON / Markdown 文件</td>
+</tr>
+</tbody>
+</table>
+<p>图片扩展名虽出现在上传控件中，当前代码会提示改为粘贴文字，不能据此宣称支持图片理解。网页默认不把生成结果写入
+outputs；会话缓存也不等于长期保存资料。</p>
+<h1 id="产品流程与交互">4. 产品流程与交互</h1>
+<h2 id="用户主流程">4.1 用户主流程</h2>
+<figure>
+<svg id="svg_8911add9254b36780042" alt="图 1：用户主流程；补充事实审查后可直接生成简历" width="424pt" height="765pt" viewBox="0.00 0.00 423.80 764.80">
+<g id="svg_8911add9254b36780042_graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 750.4)">
+<title>flow</title>
+<!-- input -->
+<g id="svg_8911add9254b36780042_node1" class="node">
+<title>input</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M303.5,-736C303.5,-736 188.5,-736 188.5,-736 182.5,-736 176.5,-730 176.5,-724 176.5,-724 176.5,-712 176.5,-712 176.5,-706 182.5,-700 188.5,-700 188.5,-700 303.5,-700 303.5,-700 309.5,-700 315.5,-706 315.5,-712 315.5,-712 315.5,-724 315.5,-724 315.5,-730 309.5,-736 303.5,-736" />
+<text text-anchor="middle" x="246" y="-714.9" font-family="Noto Sans CJK SC" font-size="12.00">输入经历库与目标 JD</text>
+</g>
+<!-- analysis -->
+<g id="svg_8911add9254b36780042_node2" class="node">
+<title>analysis</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M351.5,-675C351.5,-675 140.5,-675 140.5,-675 134.5,-675 128.5,-669 128.5,-663 128.5,-663 128.5,-651 128.5,-651 128.5,-645 134.5,-639 140.5,-639 140.5,-639 351.5,-639 351.5,-639 357.5,-639 363.5,-645 363.5,-651 363.5,-651 363.5,-663 363.5,-663 363.5,-669 357.5,-675 351.5,-675" />
+<text text-anchor="middle" x="246" y="-653.9" font-family="Noto Sans CJK SC" font-size="12.00">JD 拆解 → 经历检索 → 匹配与缺口分析</text>
+</g>
+<!-- input&#45;&gt;analysis -->
+<g id="svg_8911add9254b36780042_edge1" class="edge">
+<title>input-&gt;analysis</title>
+<path fill="none" stroke="#527989" d="M246,-699.93C246,-694.48 246,-688.33 246,-682.45" />
+<polygon fill="#527989" stroke="#527989" points="248.45,-682.23 246,-675.23 243.55,-682.23 248.45,-682.23"></polygon>
+</g>
+<!-- summary -->
+<g id="svg_8911add9254b36780042_node3" class="node">
+<title>summary</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M300.5,-614C300.5,-614 191.5,-614 191.5,-614 185.5,-614 179.5,-608 179.5,-602 179.5,-602 179.5,-590 179.5,-590 179.5,-584 185.5,-578 191.5,-578 191.5,-578 300.5,-578 300.5,-578 306.5,-578 312.5,-584 312.5,-590 312.5,-590 312.5,-602 312.5,-602 312.5,-608 306.5,-614 300.5,-614" />
+<text text-anchor="middle" x="246" y="-592.9" font-family="Noto Sans CJK SC" font-size="12.00">查看匹配摘要与证据</text>
+</g>
+<!-- analysis&#45;&gt;summary -->
+<g id="svg_8911add9254b36780042_edge2" class="edge">
+<title>analysis-&gt;summary</title>
+<path fill="none" stroke="#527989" d="M246,-638.93C246,-633.48 246,-627.33 246,-621.45" />
+<polygon fill="#527989" stroke="#527989" points="248.45,-621.23 246,-614.23 243.55,-621.23 248.45,-621.23"></polygon>
+</g>
+<!-- choice -->
+<g id="svg_8911add9254b36780042_node4" class="node">
+<title>choice</title>
+<path fill="#e3f3ef" stroke="#a4bec9" d="M234.64,-549.13C234.64,-549.13 172.36,-527.87 172.36,-527.87 166.68,-525.94 166.68,-522.06 172.36,-520.13 172.36,-520.13 234.64,-498.87 234.64,-498.87 240.32,-496.94 251.68,-496.94 257.36,-498.87 257.36,-498.87 319.64,-520.13 319.64,-520.13 325.32,-522.06 325.32,-525.94 319.64,-527.87 319.64,-527.87 257.36,-549.13 257.36,-549.13 251.68,-551.06 240.32,-551.06 234.64,-549.13" />
+<text text-anchor="middle" x="246" y="-520.9" font-family="Noto Sans CJK SC" font-size="12.00">是否补充？</text>
+</g>
+<!-- summary&#45;&gt;choice -->
+<g id="svg_8911add9254b36780042_edge3" class="edge">
+<title>summary-&gt;choice</title>
+<path fill="none" stroke="#527989" d="M246,-577.7C246,-572.4 246,-566.37 246,-560.33" />
+<polygon fill="#527989" stroke="#527989" points="248.45,-560.27 246,-553.27 243.55,-560.27 248.45,-560.27"></polygon>
+</g>
+<!-- question -->
+<g id="svg_8911add9254b36780042_node5" class="node">
+<title>question</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M185.5,-460C185.5,-460 76.5,-460 76.5,-460 70.5,-460 64.5,-454 64.5,-448 64.5,-448 64.5,-436 64.5,-436 64.5,-430 70.5,-424 76.5,-424 76.5,-424 185.5,-424 185.5,-424 191.5,-424 197.5,-430 197.5,-436 197.5,-436 197.5,-448 197.5,-448 197.5,-454 191.5,-460 185.5,-460" />
+<text text-anchor="middle" x="131" y="-438.9" font-family="Noto Sans CJK SC" font-size="12.00">显示当前高价值追问</text>
+</g>
+<!-- choice&#45;&gt;question -->
+<g id="svg_8911add9254b36780042_edge4" class="edge">
+<title>choice-&gt;question</title>
+<path fill="none" stroke="#527989" d="M218.75,-504.04C201.56,-492.09 179.33,-476.62 161.55,-464.25" />
+<polygon fill="#527989" stroke="#527989" points="162.85,-462.17 155.71,-460.19 160.05,-466.2 162.85,-462.17"></polygon>
+<text text-anchor="middle" x="227.5" y="-475" font-family="Noto Sans CJK SC" font-size="10.00">有问题，愿意回答</text>
+</g>
+<!-- generate -->
+<g id="svg_8911add9254b36780042_node9" class="node">
+<title>generate</title>
+<path fill="#ddeef5" stroke="#a4bec9" d="M282.5,-164C282.5,-164 125.5,-164 125.5,-164 119.5,-164 113.5,-158 113.5,-152 113.5,-152 113.5,-140 113.5,-140 113.5,-134 119.5,-128 125.5,-128 125.5,-128 282.5,-128 282.5,-128 288.5,-128 294.5,-134 294.5,-140 294.5,-140 294.5,-152 294.5,-152 294.5,-158 288.5,-164 282.5,-164" />
+<text text-anchor="middle" x="204" y="-142.9" font-family="Noto Sans CJK SC" font-size="12.00">生成简历正文与独立优化建议</text>
+</g>
+<!-- choice&#45;&gt;generate -->
+<g id="svg_8911add9254b36780042_edge5" class="edge">
+<title>choice-&gt;generate</title>
+<path fill="none" stroke="#527989" d="M276.53,-505.02C296.16,-490.94 318,-469.35 318,-443 318,-443 318,-443 318,-227 318,-198.69 294.16,-179.54 268.28,-167.1" />
+<polygon fill="#527989" stroke="#527989" points="269.05,-164.76 261.67,-164.08 267.02,-169.22 269.05,-164.76"></polygon>
+<text text-anchor="middle" x="356.5" y="-343" font-family="Noto Sans CJK SC" font-size="10.00">无问题 / 直接生成</text>
+</g>
+<!-- answer -->
+<g id="svg_8911add9254b36780042_node6" class="node">
+<title>answer</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M225.5,-399C225.5,-399 152.5,-399 152.5,-399 146.5,-399 140.5,-393 140.5,-387 140.5,-387 140.5,-375 140.5,-375 140.5,-369 146.5,-363 152.5,-363 152.5,-363 225.5,-363 225.5,-363 231.5,-363 237.5,-369 237.5,-375 237.5,-375 237.5,-387 237.5,-387 237.5,-393 231.5,-399 225.5,-399" />
+<text text-anchor="middle" x="189" y="-377.9" font-family="Noto Sans CJK SC" font-size="12.00">用户提交回答</text>
+</g>
+<!-- question&#45;&gt;answer -->
+<g id="svg_8911add9254b36780042_edge6" class="edge">
+<title>question-&gt;answer</title>
+<path fill="none" stroke="#527989" d="M147.78,-423.93C153.74,-417.87 160.54,-410.95 166.88,-404.51" />
+<polygon fill="#527989" stroke="#527989" points="168.9,-405.94 172.06,-399.23 165.41,-402.51 168.9,-405.94"></polygon>
+</g>
+<!-- next -->
+<g id="svg_8911add9254b36780042_node8" class="node">
+<title>next</title>
+<path fill="#e3f3ef" stroke="#a4bec9" d="M73.64,-253.13C73.64,-253.13 11.36,-231.87 11.36,-231.87 5.68,-229.94 5.68,-226.06 11.36,-224.13 11.36,-224.13 73.64,-202.87 73.64,-202.87 79.32,-200.94 90.68,-200.94 96.36,-202.87 96.36,-202.87 158.64,-224.13 158.64,-224.13 164.32,-226.06 164.32,-229.94 158.64,-231.87 158.64,-231.87 96.36,-253.13 96.36,-253.13 90.68,-255.06 79.32,-255.06 73.64,-253.13" />
+<text text-anchor="middle" x="85" y="-224.9" font-family="Noto Sans CJK SC" font-size="12.00">继续回答？</text>
+</g>
+<!-- question&#45;&gt;next -->
+<g id="svg_8911add9254b36780042_edge8" class="edge">
+<title>question-&gt;next</title>
+<path fill="none" stroke="#527989" d="M94.89,-423.88C68.08,-408.9 33.72,-384.31 19,-351 3.73,-316.45 31.95,-278.44 56.09,-254.18" />
+<polygon fill="#527989" stroke="#527989" points="57.88,-255.87 61.17,-249.22 54.45,-252.36 57.88,-255.87"></polygon>
+<text text-anchor="middle" x="48.5" y="-343" font-family="Noto Sans CJK SC" font-size="10.00">跳过当前问题</text>
+</g>
+<!-- review -->
+<g id="svg_8911add9254b36780042_node7" class="node">
+<title>review</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M270.5,-328C270.5,-328 137.5,-328 137.5,-328 131.5,-328 125.5,-322 125.5,-316 125.5,-316 125.5,-304 125.5,-304 125.5,-298 131.5,-292 137.5,-292 137.5,-292 270.5,-292 270.5,-292 276.5,-292 282.5,-298 282.5,-304 282.5,-304 282.5,-316 282.5,-316 282.5,-322 276.5,-328 270.5,-328" />
+<text text-anchor="middle" x="204" y="-306.9" font-family="Noto Sans CJK SC" font-size="12.00">审查补充事实及经历归属</text>
+</g>
+<!-- answer&#45;&gt;review -->
+<g id="svg_8911add9254b36780042_edge7" class="edge">
+<title>answer-&gt;review</title>
+<path fill="none" stroke="#527989" d="M192.71,-362.94C194.52,-354.63 196.72,-344.48 198.7,-335.37" />
+<polygon fill="#527989" stroke="#527989" points="201.14,-335.7 200.23,-328.34 196.35,-334.66 201.14,-335.7"></polygon>
+</g>
+<!-- review&#45;&gt;next -->
+<g id="svg_8911add9254b36780042_edge10" class="edge">
+<title>review-&gt;next</title>
+<path fill="none" stroke="#527989" d="M171.01,-292C164.28,-288.24 157.32,-284.13 151,-280 138.72,-271.97 125.82,-262.3 114.72,-253.56" />
+<polygon fill="#527989" stroke="#527989" points="116.09,-251.52 109.08,-249.08 113.04,-255.35 116.09,-251.52"></polygon>
+<text text-anchor="middle" x="171" y="-272" font-family="Noto Sans CJK SC" font-size="10.00">继续补充</text>
+</g>
+<!-- review&#45;&gt;generate -->
+<g id="svg_8911add9254b36780042_edge9" class="edge">
+<title>review-&gt;generate</title>
+<path fill="none" stroke="#0e7890" stroke-width="2" d="M204,-291.97C204,-263.12 204,-204.54 204,-171.36" />
+<polygon fill="#0e7890" stroke="#0e7890" stroke-width="2" points="206.45,-171.29 204,-164.29 201.55,-171.29 206.45,-171.29"></polygon>
+<text text-anchor="middle" x="248" y="-225.5" font-family="Noto Sans CJK SC" font-size="10.00">结束补充，生成简历</text>
+</g>
+<!-- next&#45;&gt;question -->
+<g id="svg_8911add9254b36780042_edge11" class="edge">
+<title>next-&gt;question</title>
+<path fill="none" stroke="#527989" d="M90.73,-255.39C99.71,-296.81 117,-376.5 125.71,-416.64" />
+<polygon fill="#527989" stroke="#527989" points="123.36,-417.33 127.24,-423.65 128.15,-416.29 123.36,-417.33"></polygon>
+<text text-anchor="middle" x="131" y="-343" font-family="Noto Sans CJK SC" font-size="10.00">还有问题</text>
+</g>
+<!-- next&#45;&gt;generate -->
+<g id="svg_8911add9254b36780042_edge12" class="edge">
+<title>next-&gt;generate</title>
+<path fill="none" stroke="#527989" d="M94.57,-202.01C99.21,-192.73 105.62,-182.81 114,-176 117.94,-172.8 122.24,-169.94 126.76,-167.4" />
+<polygon fill="#527989" stroke="#527989" points="127.97,-169.54 133.05,-164.13 125.71,-165.19 127.97,-169.54"></polygon>
+<text text-anchor="middle" x="152.5" y="-179" font-family="Noto Sans CJK SC" font-size="10.00">不再回答 / 已完成</text>
+</g>
+<!-- view -->
+<g id="svg_8911add9254b36780042_node10" class="node">
+<title>view</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M258.5,-103C258.5,-103 149.5,-103 149.5,-103 143.5,-103 137.5,-97 137.5,-91 137.5,-91 137.5,-79 137.5,-79 137.5,-73 143.5,-67 149.5,-67 149.5,-67 258.5,-67 258.5,-67 264.5,-67 270.5,-73 270.5,-79 270.5,-79 270.5,-91 270.5,-91 270.5,-97 264.5,-103 258.5,-103" />
+<text text-anchor="middle" x="204" y="-81.9" font-family="Noto Sans CJK SC" font-size="12.00">分别查看正文与建议</text>
+</g>
+<!-- generate&#45;&gt;view -->
+<g id="svg_8911add9254b36780042_edge13" class="edge">
+<title>generate-&gt;view</title>
+<path fill="none" stroke="#527989" d="M204,-127.93C204,-122.48 204,-116.33 204,-110.45" />
+<polygon fill="#527989" stroke="#527989" points="206.45,-110.23 204,-103.23 201.55,-110.23 206.45,-110.23"></polygon>
+</g>
+<!-- export -->
+<g id="svg_8911add9254b36780042_node11" class="node">
+<title>export</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M268,-42C268,-42 140,-42 140,-42 134,-42 128,-36 128,-30 128,-30 128,-12 128,-12 128,-6 134,0 140,0 140,0 268,0 268,0 274,0 280,-6 280,-12 280,-12 280,-30 280,-30 280,-36 274,-42 268,-42" />
+<text text-anchor="middle" x="204" y="-24.4" font-family="Noto Sans CJK SC" font-size="12.00">下载 Markdown / Word</text>
+<text text-anchor="middle" x="204" y="-11.4" font-family="Noto Sans CJK SC" font-size="12.00">仅包含简历正文</text>
+</g>
+<!-- view&#45;&gt;export -->
+<g id="svg_8911add9254b36780042_edge14" class="edge">
+<title>view-&gt;export</title>
+<path fill="none" stroke="#527989" d="M204,-66.73C204,-61.39 204,-55.37 204,-49.51" />
+<polygon fill="#527989" stroke="#527989" points="206.45,-49.25 204,-42.25 201.55,-49.25 206.45,-49.25"></polygon>
+</g>
+</g>
+</svg>
+<figcaption aria-hidden="true">图
+1：用户主流程；补充事实审查后可直接生成简历</figcaption>
+</figure>
+<p>图中“审查补充事实及经历归属”可以直接进入“生成简历”，也可以继续处理下一题；不要求返回匹配摘要，不强制回答全部问题。</p>
+<p><strong>操作边界：</strong>用户应先提交当前回答，再点击生成。当前生成按钮不会代为提交尚未提交的文本框内容。</p>
+<h2 id="系统处理流程">4.2 系统处理流程</h2>
+<figure>
+<svg id="svg_72c0dc3025bcfcd8f806" alt="图 2：系统证据处理与生成流程" width="480pt" height="628pt" viewBox="0.00 0.00 480.30 627.80">
+<g id="svg_72c0dc3025bcfcd8f806_graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 613.4)">
+<title>system</title>
+<!-- experience -->
+<g id="svg_72c0dc3025bcfcd8f806_node1" class="node">
+<title>experience</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M108,-599C108,-599 57,-599 57,-599 51,-599 45,-593 45,-587 45,-587 45,-575 45,-575 45,-569 51,-563 57,-563 57,-563 108,-563 108,-563 114,-563 120,-569 120,-575 120,-575 120,-587 120,-587 120,-593 114,-599 108,-599" />
+<text text-anchor="middle" x="82.5" y="-578.2" font-family="Noto Sans CJK SC" font-size="11.00">用户经历库</text>
+</g>
+<!-- sections -->
+<g id="svg_72c0dc3025bcfcd8f806_node3" class="node">
+<title>sections</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M153,-540C153,-540 12,-540 12,-540 6,-540 0,-534 0,-528 0,-528 0,-514 0,-514 0,-508 6,-502 12,-502 12,-502 153,-502 153,-502 159,-502 165,-508 165,-514 165,-514 165,-528 165,-528 165,-534 159,-540 153,-540" />
+<text text-anchor="middle" x="82.5" y="-524.2" font-family="Noto Sans CJK SC" font-size="11.00">Section / 经历记录解析</text>
+<text text-anchor="middle" x="82.5" y="-512.2" font-family="Noto Sans CJK SC" font-size="11.00">保留公司、角色、时间和来源</text>
+</g>
+<!-- experience&#45;&gt;sections -->
+<g id="svg_72c0dc3025bcfcd8f806_edge1" class="edge">
+<title>experience-&gt;sections</title>
+<path fill="none" stroke="#527989" d="M82.5,-562.91C82.5,-558.15 82.5,-552.87 82.5,-547.74" />
+<polygon fill="#527989" stroke="#527989" points="84.95,-547.38 82.5,-540.38 80.05,-547.38 84.95,-547.38"></polygon>
+</g>
+<!-- jd -->
+<g id="svg_72c0dc3025bcfcd8f806_node2" class="node">
+<title>jd</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M295,-599C295,-599 262,-599 262,-599 256,-599 250,-593 250,-587 250,-587 250,-575 250,-575 250,-569 256,-563 262,-563 262,-563 295,-563 295,-563 301,-563 307,-569 307,-575 307,-575 307,-587 307,-587 307,-593 301,-599 295,-599" />
+<text text-anchor="middle" x="278.5" y="-578.2" font-family="Noto Sans CJK SC" font-size="11.00">目标 JD</text>
+</g>
+<!-- parse -->
+<g id="svg_72c0dc3025bcfcd8f806_node4" class="node">
+<title>parse</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M328.5,-540C328.5,-540 228.5,-540 228.5,-540 222.5,-540 216.5,-534 216.5,-528 216.5,-528 216.5,-514 216.5,-514 216.5,-508 222.5,-502 228.5,-502 228.5,-502 328.5,-502 328.5,-502 334.5,-502 340.5,-508 340.5,-514 340.5,-514 340.5,-528 340.5,-528 340.5,-534 334.5,-540 328.5,-540" />
+<text text-anchor="middle" x="278.5" y="-524.2" font-family="Noto Sans CJK SC" font-size="11.00">JD 结构化解析</text>
+<text text-anchor="middle" x="278.5" y="-512.2" font-family="Noto Sans CJK SC" font-size="11.00">岗位目标 / 职责 / KSA</text>
+</g>
+<!-- jd&#45;&gt;parse -->
+<g id="svg_72c0dc3025bcfcd8f806_edge4" class="edge">
+<title>jd-&gt;parse</title>
+<path fill="none" stroke="#527989" d="M278.5,-562.91C278.5,-558.15 278.5,-552.87 278.5,-547.74" />
+<polygon fill="#527989" stroke="#527989" points="280.95,-547.38 278.5,-540.38 276.05,-547.38 280.95,-547.38"></polygon>
+</g>
+<!-- chunks -->
+<g id="svg_72c0dc3025bcfcd8f806_node5" class="node">
+<title>chunks</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M184,-479C184,-479 99,-479 99,-479 93,-479 87,-473 87,-467 87,-467 87,-453 87,-453 87,-447 93,-441 99,-441 99,-441 184,-441 184,-441 190,-441 196,-447 196,-453 196,-453 196,-467 196,-467 196,-473 190,-479 184,-479" />
+<text text-anchor="middle" x="141.5" y="-463.2" font-family="Noto Sans CJK SC" font-size="11.00">按经历记录分块</text>
+<text text-anchor="middle" x="141.5" y="-451.2" font-family="Noto Sans CJK SC" font-size="11.00">来源信息随块保留</text>
+</g>
+<!-- sections&#45;&gt;chunks -->
+<g id="svg_72c0dc3025bcfcd8f806_edge2" class="edge">
+<title>sections-&gt;chunks</title>
+<path fill="none" stroke="#527989" d="M100.52,-501.98C106.02,-496.48 112.15,-490.35 117.96,-484.54" />
+<polygon fill="#527989" stroke="#527989" points="119.96,-486 123.18,-479.32 116.5,-482.54 119.96,-486"></polygon>
+</g>
+<!-- resume -->
+<g id="svg_72c0dc3025bcfcd8f806_node12" class="node">
+<title>resume</title>
+<path fill="#ddeef5" stroke="#a4bec9" d="M279,-97C279,-97 128,-97 128,-97 122,-97 116,-91 116,-85 116,-85 116,-71 116,-71 116,-65 122,-59 128,-59 128,-59 279,-59 279,-59 285,-59 291,-65 291,-71 291,-71 291,-85 291,-85 291,-91 285,-97 279,-97" />
+<text text-anchor="middle" x="203.5" y="-81.2" font-family="Noto Sans CJK SC" font-size="11.00">最终生成</text>
+<text text-anchor="middle" x="203.5" y="-69.2" font-family="Noto Sans CJK SC" font-size="11.00">证据原文 + 有效补充为事实依据</text>
+</g>
+<!-- sections&#45;&gt;resume -->
+<g id="svg_72c0dc3025bcfcd8f806_edge13" class="edge">
+<title>sections-&gt;resume</title>
+<path fill="none" stroke="#527989" stroke-dasharray="5,2" d="M67.68,-501.79C60.12,-490.69 52.5,-475.82 52.5,-461 52.5,-461 52.5,-461 52.5,-138 52.5,-108.17 78.38,-92.93 108.71,-85.31" />
+<polygon fill="#527989" stroke="#527989" points="109.39,-87.66 115.66,-83.7 108.29,-82.89 109.39,-87.66"></polygon>
+<text text-anchor="middle" x="102" y="-300.8" font-family="Noto Sans CJK SC" font-size="9.00">教育 / 技能等直接上下文</text>
+</g>
+<!-- queries -->
+<g id="svg_72c0dc3025bcfcd8f806_node6" class="node">
+<title>queries</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M326.5,-478C326.5,-478 230.5,-478 230.5,-478 224.5,-478 218.5,-472 218.5,-466 218.5,-466 218.5,-454 218.5,-454 218.5,-448 224.5,-442 230.5,-442 230.5,-442 326.5,-442 326.5,-442 332.5,-442 338.5,-448 338.5,-454 338.5,-454 338.5,-466 338.5,-466 338.5,-472 332.5,-478 326.5,-478" />
+<text text-anchor="middle" x="278.5" y="-457.2" font-family="Noto Sans CJK SC" font-size="11.00">中等粒度任务 Query</text>
+</g>
+<!-- parse&#45;&gt;queries -->
+<g id="svg_72c0dc3025bcfcd8f806_edge5" class="edge">
+<title>parse-&gt;queries</title>
+<path fill="none" stroke="#527989" d="M278.5,-501.98C278.5,-496.76 278.5,-490.97 278.5,-485.43" />
+<polygon fill="#527989" stroke="#527989" points="280.95,-485.1 278.5,-478.1 276.05,-485.1 280.95,-485.1"></polygon>
+</g>
+<!-- retrieve -->
+<g id="svg_72c0dc3025bcfcd8f806_node7" class="node">
+<title>retrieve</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M263,-418C263,-418 120,-418 120,-418 114,-418 108,-412 108,-406 108,-406 108,-392 108,-392 108,-386 114,-380 120,-380 120,-380 263,-380 263,-380 269,-380 275,-386 275,-392 275,-392 275,-406 275,-406 275,-412 269,-418 263,-418" />
+<text text-anchor="middle" x="191.5" y="-402.2" font-family="Noto Sans CJK SC" font-size="11.00">Embedding + 关键词混合排序</text>
+<text text-anchor="middle" x="191.5" y="-390.2" font-family="Noto Sans CJK SC" font-size="11.00">按经历组配额召回</text>
+</g>
+<!-- chunks&#45;&gt;retrieve -->
+<g id="svg_72c0dc3025bcfcd8f806_edge3" class="edge">
+<title>chunks-&gt;retrieve</title>
+<path fill="none" stroke="#527989" d="M156.77,-440.98C161.34,-435.59 166.42,-429.6 171.25,-423.89" />
+<polygon fill="#527989" stroke="#527989" points="173.32,-425.24 175.98,-418.32 169.58,-422.08 173.32,-425.24"></polygon>
+</g>
+<!-- queries&#45;&gt;retrieve -->
+<g id="svg_72c0dc3025bcfcd8f806_edge6" class="edge">
+<title>queries-&gt;retrieve</title>
+<path fill="none" stroke="#527989" d="M253.34,-441.93C244.19,-435.73 233.73,-428.64 224.04,-422.07" />
+<polygon fill="#527989" stroke="#527989" points="225.29,-419.96 218.12,-418.06 222.54,-424.01 225.29,-419.96"></polygon>
+</g>
+<!-- atoms -->
+<g id="svg_72c0dc3025bcfcd8f806_node8" class="node">
+<title>atoms</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M360.5,-357C360.5,-357 214.5,-357 214.5,-357 208.5,-357 202.5,-351 202.5,-345 202.5,-345 202.5,-331 202.5,-331 202.5,-325 208.5,-319 214.5,-319 214.5,-319 360.5,-319 360.5,-319 366.5,-319 372.5,-325 372.5,-331 372.5,-331 372.5,-345 372.5,-345 372.5,-351 366.5,-357 360.5,-357" />
+<text text-anchor="middle" x="287.5" y="-341.2" font-family="Noto Sans CJK SC" font-size="11.00">选中原文 → Experience Atoms</text>
+<text text-anchor="middle" x="287.5" y="-329.2" font-family="Noto Sans CJK SC" font-size="11.00">STAR / KSA 标注，不新增事实</text>
+</g>
+<!-- retrieve&#45;&gt;atoms -->
+<g id="svg_72c0dc3025bcfcd8f806_edge7" class="edge">
+<title>retrieve-&gt;atoms</title>
+<path fill="none" stroke="#527989" d="M220.82,-379.98C230.6,-373.97 241.59,-367.21 251.79,-360.94" />
+<polygon fill="#527989" stroke="#527989" points="253.34,-362.87 258.02,-357.12 250.78,-358.69 253.34,-362.87"></polygon>
+</g>
+<!-- retrieve&#45;&gt;resume -->
+<g id="svg_72c0dc3025bcfcd8f806_edge14" class="edge">
+<title>retrieve-&gt;resume</title>
+<path fill="none" stroke="#527989" stroke-dasharray="5,2" d="M180.4,-379.84C174.52,-368.51 168.5,-353.4 168.5,-339 168.5,-339 168.5,-339 168.5,-138 168.5,-125.26 174.61,-112.86 181.73,-102.74" />
+<polygon fill="#527989" stroke="#527989" points="183.75,-104.13 186,-97.07 179.84,-101.19 183.75,-104.13"></polygon>
+<text text-anchor="middle" x="196" y="-232.8" font-family="Noto Sans CJK SC" font-size="9.00">选中原文证据</text>
+</g>
+<!-- match -->
+<g id="svg_72c0dc3025bcfcd8f806_node9" class="node">
+<title>match</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M333,-287C333,-287 242,-287 242,-287 236,-287 230,-281 230,-275 230,-275 230,-263 230,-263 230,-257 236,-251 242,-251 242,-251 333,-251 333,-251 339,-251 345,-257 345,-263 345,-263 345,-275 345,-275 345,-281 339,-287 333,-287" />
+<text text-anchor="middle" x="287.5" y="-266.2" font-family="Noto Sans CJK SC" font-size="11.00">质量检查与 JD 匹配</text>
+</g>
+<!-- atoms&#45;&gt;match -->
+<g id="svg_72c0dc3025bcfcd8f806_edge8" class="edge">
+<title>atoms-&gt;match</title>
+<path fill="none" stroke="#527989" d="M287.5,-318.69C287.5,-311.22 287.5,-302.46 287.5,-294.45" />
+<polygon fill="#527989" stroke="#527989" points="289.95,-294.36 287.5,-287.36 285.05,-294.36 289.95,-294.36"></polygon>
+</g>
+<!-- score -->
+<g id="svg_72c0dc3025bcfcd8f806_node10" class="node">
+<title>score</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M352.5,-219C352.5,-219 222.5,-219 222.5,-219 216.5,-219 210.5,-213 210.5,-207 210.5,-207 210.5,-193 210.5,-193 210.5,-187 216.5,-181 222.5,-181 222.5,-181 352.5,-181 352.5,-181 358.5,-181 364.5,-187 364.5,-193 364.5,-193 364.5,-207 364.5,-207 364.5,-213 358.5,-219 352.5,-219" />
+<text text-anchor="middle" x="287.5" y="-203.2" font-family="Noto Sans CJK SC" font-size="11.00">程序计算覆盖度和适配等级</text>
+<text text-anchor="middle" x="287.5" y="-191.2" font-family="Noto Sans CJK SC" font-size="11.00">模型解释结果</text>
+</g>
+<!-- match&#45;&gt;score -->
+<g id="svg_72c0dc3025bcfcd8f806_edge9" class="edge">
+<title>match-&gt;score</title>
+<path fill="none" stroke="#527989" d="M287.5,-250.75C287.5,-243.38 287.5,-234.64 287.5,-226.55" />
+<polygon fill="#527989" stroke="#527989" points="289.95,-226.37 287.5,-219.37 285.05,-226.37 289.95,-226.37"></polygon>
+</g>
+<!-- follow -->
+<g id="svg_72c0dc3025bcfcd8f806_node11" class="node">
+<title>follow</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M348.5,-158C348.5,-158 214.5,-158 214.5,-158 208.5,-158 202.5,-152 202.5,-146 202.5,-146 202.5,-132 202.5,-132 202.5,-126 208.5,-120 214.5,-120 214.5,-120 348.5,-120 348.5,-120 354.5,-120 360.5,-126 360.5,-132 360.5,-132 360.5,-146 360.5,-146 360.5,-152 354.5,-158 348.5,-158" />
+<text text-anchor="middle" x="281.5" y="-142.2" font-family="Noto Sans CJK SC" font-size="11.00">按缺口生成追问计划</text>
+<text text-anchor="middle" x="281.5" y="-130.2" font-family="Noto Sans CJK SC" font-size="11.00">用户回答 → 理解及归属审查</text>
+</g>
+<!-- score&#45;&gt;follow -->
+<g id="svg_72c0dc3025bcfcd8f806_edge10" class="edge">
+<title>score-&gt;follow</title>
+<path fill="none" stroke="#527989" d="M285.67,-180.98C285.16,-176.04 284.61,-170.59 284.08,-165.32" />
+<polygon fill="#527989" stroke="#527989" points="286.51,-165.04 283.36,-158.32 281.63,-165.53 286.51,-165.04"></polygon>
+</g>
+<!-- score&#45;&gt;resume -->
+<g id="svg_72c0dc3025bcfcd8f806_edge15" class="edge">
+<title>score-&gt;resume</title>
+<path fill="none" stroke="#527989" stroke-dasharray="5,2" d="M346.56,-180.78C356.47,-175.07 365.48,-167.63 371.5,-158 380.45,-143.68 381.93,-133.28 371.5,-120 361.59,-107.38 330.66,-98.15 298,-91.68" />
+<polygon fill="#527989" stroke="#527989" points="298.35,-89.25 291.01,-90.34 297.42,-94.06 298.35,-89.25"></polygon>
+<text text-anchor="middle" x="415" y="-136.8" font-family="Noto Sans CJK SC" font-size="9.00">可不补充直接生成</text>
+</g>
+<!-- follow&#45;&gt;resume -->
+<g id="svg_72c0dc3025bcfcd8f806_edge11" class="edge">
+<title>follow-&gt;resume</title>
+<path fill="none" stroke="#527989" d="M257.67,-119.98C250.03,-114.2 241.47,-107.72 233.45,-101.66" />
+<polygon fill="#527989" stroke="#527989" points="234.51,-99.38 227.45,-97.12 231.55,-103.29 234.51,-99.38"></polygon>
+</g>
+<!-- output -->
+<g id="svg_72c0dc3025bcfcd8f806_node13" class="node">
+<title>output</title>
+<path fill="#f0f6fa" stroke="#a4bec9" d="M267,-36C267,-36 140,-36 140,-36 134,-36 128,-30 128,-24 128,-24 128,-12 128,-12 128,-6 134,0 140,0 140,0 267,0 267,0 273,0 279,-6 279,-12 279,-12 279,-24 279,-24 279,-30 273,-36 267,-36" />
+<text text-anchor="middle" x="203.5" y="-15.2" font-family="Noto Sans CJK SC" font-size="11.00">独立字段：正文 / 优化建议</text>
+</g>
+<!-- resume&#45;&gt;output -->
+<g id="svg_72c0dc3025bcfcd8f806_edge12" class="edge">
+<title>resume-&gt;output</title>
+<path fill="none" stroke="#527989" d="M203.5,-58.97C203.5,-53.94 203.5,-48.39 203.5,-43.07" />
+<polygon fill="#527989" stroke="#527989" points="205.95,-43.03 203.5,-36.03 201.05,-43.03 205.95,-43.03"></polygon>
+</g>
+</g>
+</svg>
+<figcaption aria-hidden="true">图 2：系统证据处理与生成流程</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>阶段</th>
+<th>输入 → 输出</th>
+<th>职责边界</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>JD 解析</td>
+<td>JD → 结构化岗位要求</td>
+<td>不把 JD 未写出的细分能力任意扩展为独立要求</td>
+</tr>
+<tr class="even">
+<td>经历解析</td>
+<td>经历库 → sections / experience records</td>
+<td>分类并保留事实；同公司同角色同时间的任务不拆成多份经历</td>
+</tr>
+<tr class="odd">
+<td>证据检索</td>
+<td>经历块＋JD task units → selected chunks</td>
+<td>检索原文，保留来源；不直接生成简历</td>
+</tr>
+<tr class="even">
+<td>结构化与检查</td>
+<td>选中证据 → atoms、材料质量检查</td>
+<td>标注 STAR / KSA；不重新读取完整经历库绕过检索</td>
+</tr>
+<tr class="odd">
+<td>匹配与评分</td>
+<td>JD＋atoms → 覆盖、缺口、分数与解释</td>
+<td>模型分类，程序计算分数；解释不能扩大结论</td>
+</tr>
+<tr class="even">
+<td>追问与理解</td>
+<td>缺口＋回答 → 审查后的补充</td>
+<td>不替用户补事实，不自动写回原经历库</td>
+</tr>
+<tr class="odd">
+<td>最终生成</td>
+<td>原文证据＋有效补充＋必要标注 → 两类输出</td>
+<td>正文和建议分离，不暴露内部字段</td>
+</tr>
+</tbody>
+</table>
+<h2 id="网页页面与关键动作">4.3 网页页面与关键动作</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>页面</th>
+<th>用户操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>经历库</td>
+<td>编辑、导入、继续</td>
+<td>将经历作为当前流程输入；可查看解析后的经历分类</td>
+</tr>
+<tr class="even">
+<td>目标 JD</td>
+<td>编辑、导入、分析</td>
+<td>展示岗位要求与关键词，再进入匹配</td>
+</tr>
+<tr class="odd">
+<td>匹配摘要</td>
+<td>查看适配解释、强项、缺口和证据</td>
+<td>用户决定是否继续补充；低分是建议，不替用户决定停止</td>
+</tr>
+<tr class="even">
+<td>AI 追问</td>
+<td>查看原因、提交、跳过、返回、直接生成</td>
+<td>已提交补充用于本轮；可不回答所有问题</td>
+</tr>
+<tr class="odd">
+<td>简历草稿</td>
+<td>查看正文及独立建议、下载</td>
+<td>Markdown 与 Word 文件只包含正文</td>
+</tr>
+</tbody>
+</table>
+<h2 id="关键异常处理">4.4 关键异常处理</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>情况</th>
+<th>预期行为及当前限制</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>输入为空</td>
+<td>在发起有效分析前提示补充输入</td>
+</tr>
+<tr class="even">
+<td>文件不支持或解析失败</td>
+<td>显示原因，允许改用纯文本；不伪装成读取成功</td>
+</tr>
+<tr class="odd">
+<td>缺少 Key、API 调用失败</td>
+<td>显示错误，保留页面可用性；当前不承诺任意节点自动恢复</td>
+</tr>
+<tr class="even">
+<td>无候选追问</td>
+<td>允许直接生成</td>
+</tr>
+<tr class="odd">
+<td>不知道、没有或跳过</td>
+<td>接受信息边界，不推断不存在的结果</td>
+</tr>
+<tr class="even">
+<td>材料更新</td>
+<td>不应把旧输入的分析当作新结果；现有缓存键包含输入与语言，但编辑同步和旧状态清理仍需专项验收</td>
+</tr>
+<tr class="odd">
+<td>刷新、离开或服务重启</td>
+<td>不承诺跨会话恢复；页面内切换与长期保存不是同一能力</td>
+</tr>
+</tbody>
+</table>
+<h1 id="详细功能需求">5. 详细功能需求</h1>
+<p>P0 表示核心路径必需，P1
+表示辅助理解或研发效率。验收条件描述应有行为；是否已通过见第 9 章。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>编号</th>
+<th>优先级</th>
+<th>需求与关键规则</th>
+<th>验收条件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IN-01</td>
+<td>P0</td>
+<td>输入完整经历库与一个目标 JD，支持声明的文本文件格式</td>
+<td>两项输入可进入分析；空输入和不支持类型有明确反馈</td>
+</tr>
+<tr class="even">
+<td>JD-01</td>
+<td>P0</td>
+<td>用 KSA 理解岗位，基础学历、年限等独立保留</td>
+<td>结构化结果反映原 JD；不任意增加细碎要求</td>
+</tr>
+<tr class="odd">
+<td>EV-01</td>
+<td>P0</td>
+<td>先解析 section 和单段经历，再在经历组内检索</td>
+<td>工作/实习与项目独立召回；每块有可识别来源</td>
+</tr>
+<tr class="even">
+<td>EV-02</td>
+<td>P0</td>
+<td>仅对选中证据结构化，事实与标注分离</td>
+<td>atom 关联正确经历；冲突时以原文与用户回答为准</td>
+</tr>
+<tr class="odd">
+<td>MT-01</td>
+<td>P0</td>
+<td>给出覆盖判断、缺口及程序计算的适配等级</td>
+<td>确定的匹配标签产生确定分数；文字解释不重新定分</td>
+</tr>
+<tr class="even">
+<td>HU-01</td>
+<td>P0</td>
+<td>基于高价值缺口排序追问，解释提问目的</td>
+<td>用户能看到当前问题及相关要求 / 经历，并可跳过</td>
+</tr>
+<tr class="odd">
+<td>HU-02</td>
+<td>P0</td>
+<td>审查已提交回答，保留事实归属，仅用于本轮</td>
+<td>回答与问题关联；不混入另一段经历，不自动更新底层事实库</td>
+</tr>
+<tr class="even">
+<td>HU-03</td>
+<td>P0</td>
+<td>用户可以结束补充并生成简历</td>
+<td>审查后有直接生成路径；无需回到匹配摘要或答完所有题</td>
+</tr>
+<tr class="odd">
+<td>RES-01</td>
+<td>P0</td>
+<td>输出简历正文与优化建议两个独立字段</td>
+<td>页面分区展示；Markdown、DOCX 均只导出正文</td>
+</tr>
+<tr class="even">
+<td>RES-02</td>
+<td>P0</td>
+<td>保留真实公司、角色及已知时间；不编造量化成果</td>
+<td>输出能回溯证据；缺失内容用稳健表达，不填假数字</td>
+</tr>
+<tr class="odd">
+<td>EN-01</td>
+<td>P0</td>
+<td>英文入口覆盖界面、提示词、本地追问、错误回退和输出</td>
+<td>英文示例链路无中文残留；不改 schema 键、枚举及事实关联</td>
+</tr>
+<tr class="even">
+<td>OBS-01</td>
+<td>P1</td>
+<td>保留可调试状态和调用元数据</td>
+<td>可定位阶段、输入输出及调用量；日志不记录密钥</td>
+</tr>
+</tbody>
+</table>
+<p><strong>状态一致性补充：</strong>v0.3
+记录过编辑草稿与业务输入分离的修复，但当前代码未见同名实现。该问题保留为待核实项，不能仅依据旧文档标记解决。</p>
+<h1 id="ai-行为评分与追问规则">6. AI 行为、评分与追问规则</h1>
+<h2 id="事实与证据归属">6.1 事实与证据归属</h2>
+<p>事实来源仅包括原始经历、检索原文及用户补充。JD
+分析、atoms、匹配标签、分数和摘要是辅助标注，不是新增事实。</p>
+<ul>
+<li>每条证据随流程保留
+section、公司/项目、具体经历及相关问题的关联。</li>
+<li>同一经历内任务可合并表达，不得把不同经历的行动或成果拼到一起。</li>
+<li>用户否认或无法确认的信息不写成事实；缺少 Result 不补造结果。</li>
+<li>正文不出现 chunk ID、内部 score、检索元数据或调试分析。</li>
+<li>模型输出使用 schema 约束结构；结构正确仍需核对事实和归属。</li>
+</ul>
+<h2 id="检索规则与实现边界">6.2 检索规则与实现边界</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>当前方案</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Query</td>
+<td>岗位目标、主要职责形成中等粒度 task units，关键词 / KSA 辅助</td>
+</tr>
+<tr class="even">
+<td>文档粒度</td>
+<td>经历原文 chunk；默认长度 620 字符、重叠 100 字符</td>
+</tr>
+<tr class="odd">
+<td>排序</td>
+<td>语义相似度与关键词重合混合；默认权重 0.72 / 0.28</td>
+</tr>
+<tr class="even">
+<td>召回组配额</td>
+<td>工作/实习 12、项目 6、校园/其他 3；是 chunk 配额，不是简历 bullet
+数</td>
+</tr>
+<tr class="odd">
+<td>直接上下文</td>
+<td>教育、技能、证书等不参与同一竞争式召回，保留为背景</td>
+</tr>
+<tr class="even">
+<td>Embedding</td>
+<td><code>text-embedding-3-small</code></td>
+</tr>
+<tr class="odd">
+<td>持久化</td>
+<td>运行时 embedding 与内存相似度计算；未部署持久化向量库</td>
+</tr>
+</tbody>
+</table>
+<p>上述参数是当前实现基线，不是所有人群通用的最优值。最终生成保留选中原文，默认不截断；优先减少重复中间上下文，再考虑损失原始证据的节省方式。</p>
+<h2 id="证据覆盖度分数">6.3 证据覆盖度分数</h2>
+<p>Readiness score 衡量当前材料对 JD
+的证据覆盖，不是录用概率或候选人整体能力分。</p>
+<p><code>内部得分 = Σ(要求权重 × 覆盖分) / Σ要求权重</code>；内部范围
+0–1，界面可转换为百分制。</p>
+<table>
+<thead>
+<tr class="header">
+<th>覆盖等级</th>
+<th>strong</th>
+<th>medium</th>
+<th>weak</th>
+<th>none</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>覆盖分</td>
+<td>1.00</td>
+<td>0.65</td>
+<td>0.35</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table>
+<p>当前重要性映射：high → 1.5；medium → 1.0，若为 ability 则为 0.8；low
+→ 0.6。覆盖等级由模型的 match level 与 evidence quality
+保守映射后计算。</p>
+<table>
+<thead>
+<tr class="header">
+<th>百分制区间</th>
+<th>适配等级</th>
+<th>展示含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>≥85</td>
+<td>high_fit</td>
+<td>高覆盖，可继续组织简历</td>
+</tr>
+<tr class="even">
+<td>≥70 且 &lt;85</td>
+<td>good_fit</td>
+<td>良好覆盖</td>
+</tr>
+<tr class="odd">
+<td>≥55 且 &lt;70</td>
+<td>partial_fit</td>
+<td>部分覆盖，谨慎补充</td>
+</tr>
+<tr class="even">
+<td>≥40 且 &lt;55</td>
+<td>weak_fit</td>
+<td>有限覆盖</td>
+</tr>
+<tr class="odd">
+<td>&lt;40</td>
+<td>low_fit</td>
+<td>核心要求支撑不足，建议重新考虑</td>
+</tr>
+</tbody>
+</table>
+<p>程序计算减少了算分漂移，但模型仍参与前置分类，因此重复运行不保证完全同分。早期日志的多因子乘法、STAR
+完整度等属于探索记录，不是当前总分公式。</p>
+<h2 id="human-in-the-loop">6.4 Human-in-the-loop</h2>
+<p>网页当前根据匹配缺口生成候选问题，按优先级逐题展示；用户可提交、跳过或随时生成。回答理解结果保留可用事实与经历关联；页面中的补充后估计分不能当作重新执行完整匹配后的实测提升。</p>
+<p>必须区分历史机制与当前入口：</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>项目</th>
+<th>网页当前行为</th>
+<th>CLI / 历史机制</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>初始问题</td>
+<td>按缺口生成并排序展示</td>
+<td>另有话题池与交互控制</td>
+</tr>
+<tr class="even">
+<td>高分停止</td>
+<td>页面不按 0.8 阈值强制跳过所有追问</td>
+<td>CLI 存在 readiness 阈值判断</td>
+</tr>
+<tr class="odd">
+<td>同话题深挖</td>
+<td>当前网页主要处理既有候选题</td>
+<td>CLI 有动态同话题追问、澄清及预算控制（当前常量：总问题上限
+10、每话题追加上限 2、澄清预算 1）</td>
+</tr>
+<tr class="even">
+<td>用户结束</td>
+<td>可直接点击生成</td>
+<td>可使用控制词结束</td>
+</tr>
+</tbody>
+</table>
+<p>“顺着回答深入追问”是研发中的重要探索，不能据此宣称当前网页已完整采用
+CLI 的动态追问机制。</p>
+<h1 id="架构状态与非功能要求">7. 架构、状态与非功能要求</h1>
+<h2 id="状态与模块">7.1 状态与模块</h2>
+<p>当前为共享工作流函数与统一状态驱动的多步骤 AI 应用，尚未迁移为
+LangGraph 多 Agent
+系统。用户体验保持同一助手连续理解，但各模型调用不必继承完整对话。</p>
+<table>
+<thead>
+<tr class="header">
+<th>状态层</th>
+<th>保存内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>原始事实</td>
+<td>经历库、JD、补充回答</td>
+</tr>
+<tr class="even">
+<td>检索证据</td>
+<td>sections、选中 chunks、provenance</td>
+</tr>
+<tr class="odd">
+<td>结构化标注</td>
+<td>atoms、质量检查、匹配与缺口</td>
+</tr>
+<tr class="even">
+<td>决策与交互</td>
+<td>分数、适配结论、问题、审查结果、分支记录</td>
+</tr>
+<tr class="odd">
+<td>展示与诊断</td>
+<td>正文、建议、trace、API payload 元数据</td>
+</tr>
+</tbody>
+</table>
+<p>关键模块：<code>core/simple_mvp.py</code>
+管理步骤与状态；<code>core/retrieval.py</code>
+负责检索；<code>prompts/</code> 与 <code>prompts/en/</code>
+管理提示词；<code>ui/app.py</code>
+提供共享页面，<code>ui/app_en.py</code> 启动英文模式。</p>
+<h2 id="质量与运行要求">7.2 质量与运行要求</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>维度</th>
+<th>要求与当前边界</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>正确性</td>
+<td>不制造事实、不串经历；依赖样例和人工核查，尚无大规模事实准确率数据</td>
+</tr>
+<tr class="even">
+<td>等待体验</td>
+<td>展示阶段进度与错误；日志曾记录约 3 分 20
+秒的单次等待，不作为稳定性能基线</td>
+</tr>
+<tr class="odd">
+<td>稳定性</td>
+<td>支持调用重试及页面报错；尚无跨重启
+checkpoint、完整后台任务恢复或稳定 SLA</td>
+</tr>
+<tr class="even">
+<td>隐私</td>
+<td>Key 通过运行环境或 Streamlit Secrets 注入；资料与密钥不提交
+GitHub；原文会发送至模型 / embedding 服务，隐私告知仍需完善</td>
+</tr>
+<tr class="odd">
+<td>存储</td>
+<td>网页默认
+<code>CARIAGENT_SAVE_OUTPUTS=0</code>；会话与缓存可能留有运行数据，不承诺跨会话保存，也不等于零留存</td>
+</tr>
+<tr class="even">
+<td>成本</td>
+<td>记录调用元数据与
+usage，按步骤传递必要上下文；没有经控制实验验证的节省比例</td>
+</tr>
+<tr class="odd">
+<td>语言</td>
+<td>中英文分别部署，核心逻辑复用；不通过修改来源归属或虚构名称实现翻译</td>
+</tr>
+</tbody>
+</table>
+<h1 id="产品演进与关键技术决策">8. 产品演进与关键技术决策</h1>
+<p>以下按材料可确认的阶段编排；无明确日期的阶段不补造日期或发布版本号。历史中的“已解决”反映当时结论，不替代当前代码及测试核对。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>阶段</th>
+<th>问题 / 观察</th>
+<th>关键决策及取舍</th>
+<th>证据与结果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2026-05-08：场景形成</td>
+<td>作者投递时反复评估岗位、筛选所有经历、定制简历</td>
+<td>从完整自动求职设想中收束为经历库＋JD
+的证据匹配与生成；保留用户判断</td>
+<td>研发日志记录原始求职路径及范围考虑；未实现自动投递</td>
+</tr>
+<tr class="even">
+<td>早期：追问与可解释评分</td>
+<td>全量生成难发现遗漏，单凭“AI 觉得足够”无法解释何时停止</td>
+<td>引入 STAR/KSA、显式匹配、重要性权重、缺口与停止条件</td>
+<td>日志截图保留多种评分与追问方案；部分公式后来被替换</td>
+</tr>
+<tr class="odd">
+<td>第三、四次自测：追问深度</td>
+<td>明明存在多个缺口却只问一题；回答提及另一段经历时，希望自然接续；等待较长</td>
+<td>探索优先级、澄清与同话题深挖，区分“没答清楚”与“有价值继续问”</td>
+<td>2026-05-16 日志记录体验改善与仍慢；没有可确认的总体提升比例</td>
+</tr>
+<tr class="even">
+<td>RAG 引入：从全量阅读到检索</td>
+<td>上下文增大、无关经历稀释注意力、成本与时延压力</td>
+<td>将证据选择显式化：chunk、embedding、语义＋关键词混合；为按 JD
+按需读取做准备</td>
+<td>研发日志与 RAG 日志；减少后续全量传递，但初始 section parsing
+仍读取经历库</td>
+</tr>
+<tr class="odd">
+<td>Query 纠偏：细 KSA → task units</td>
+<td>抽象细 query 出现关键词像、事实不对应的误召回</td>
+<td>改用岗位目标与职责的中等粒度 query；KSA
+继续辅助理解，不直接等于细碎检索单元</td>
+<td>RAG 日志记载纠偏，当前代码保留 task units；无严格前后召回率实验</td>
+</tr>
+<tr class="even">
+<td>召回结构：Section-aware</td>
+<td>项目信息密度高，压过工作/实习证据</td>
+<td>各经历组独立检索与配额；教育/技能直接进入上下文</td>
+<td>RAG 日志与现行代码；保留职业经历空间，配额仍需对不同人群评估</td>
+</tr>
+<tr class="odd">
+<td>事实边界：Provenance</td>
+<td>曾把一段组织经历的内容写入另一段经历</td>
+<td>从 section、经历记录、chunk 到 atom / match / answer
+传递来源；避免摘要成为新事实</td>
+<td>RAG 日志有错挂靠案例；来源字段是约束机制，不等于已证明零错误</td>
+</tr>
+<tr class="even">
+<td>Step 职责收窄与上下文控制</td>
+<td>Step 4 隐式继承全量材料，可能绕过检索、token 过大</td>
+<td>Step 4
+只结构化选中原文；分步独立调用，以必要上下文和统一状态保持连续性</td>
+<td>Workflow 说明及代码；最终生成仍优先保留选中原文，不为省 token
+默认截断</td>
+</tr>
+<tr class="odd">
+<td>稳定输出与评分</td>
+<td>模型结构不稳定、评分可能漂移</td>
+<td>使用 JSON schema；LLM 做分类与解释，程序计算覆盖总分和等级</td>
+<td>v0.3、代码；分类不确定性仍存在，完整稳定性指标待复测</td>
+</tr>
+<tr class="even">
+<td>Workflow 与网页化</td>
+<td>单脚本、CLI 不利于非技术用户，状态传递难追踪</td>
+<td><code>WorkflowState</code>＋步骤函数＋Streamlit
+五步交互＋会话缓存与诊断</td>
+<td>2026-05-28 Git 记录及
+v0.3；旧文档中的编辑同步修复与当前实现存在差异</td>
+</tr>
+<tr class="odd">
+<td>2026-10-17：输出边界与英文版</td>
+<td>建议可能混入下载文件；仅翻译 UI 仍会漏出中文</td>
+<td>一次结构化调用返回两个字段；共享核心、独立英文入口、全链路语言覆盖</td>
+<td>提交
+<code>138ed53</code>；首轮真实测试发现残留提示词冲突，修正后重测；英文样例链路通过</td>
+</tr>
+</tbody>
+</table>
+<h2 id="明确暂缓的技术方向">8.1 明确暂缓的技术方向</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>方向</th>
+<th>暂缓原因 / 再评估条件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>持久化向量库</td>
+<td>当前单份经历库、内存检索可用；多用户、多文件、重复检索与跨会话长期存储需求成立后再评估</td>
+</tr>
+<tr class="even">
+<td>个人经历知识图谱</td>
+<td>属于早期构想，当前以原文证据、来源与结构化标注实现核心路径</td>
+</tr>
+<tr class="odd">
+<td>LangGraph / 多 Agent</td>
+<td>先明确状态、步骤和输入输出；需要
+checkpoint、复杂分支、节点重试或并行协作时再做选型</td>
+</tr>
+<tr class="even">
+<td>长期事实库</td>
+<td>价值在于跨 JD
+重用与增量更新；当前未解决账号、写回确认及持久化管理</td>
+</tr>
+<tr class="odd">
+<td>多模态理解</td>
+<td>现有文本提取不等于 OCR、视觉或多模态检索；需独立验证</td>
+</tr>
+</tbody>
+</table>
+<h1 id="验收测试与效果评估">9. 验收、测试与效果评估</h1>
+<h2 id="核心验收场景">9.1 核心验收场景</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>场景</th>
+<th>通过标准</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>标准完整路径</td>
+<td>经历与 JD 能完成解析、检索、匹配、追问与生成</td>
+</tr>
+<tr class="even">
+<td>缺少成果</td>
+<td>接受缺失，不制造数字或把任务练习写成真实业务成效</td>
+</tr>
+<tr class="odd">
+<td>经历归属</td>
+<td>两段经历的行动、成果、追问补充不互相串用</td>
+</tr>
+<tr class="even">
+<td>跳过与提前生成</td>
+<td>无需补齐全部问题；已提交回答被使用，未提交内容不冒充已审查</td>
+</tr>
+<tr class="odd">
+<td>正文 / 建议</td>
+<td>页面分开，Markdown / DOCX 文件只含正文</td>
+</tr>
+<tr class="even">
+<td>英文一致性</td>
+<td>英文示例贯穿页面、问题、审查、正文与建议，无中文残留</td>
+</tr>
+<tr class="odd">
+<td>编辑与导航</td>
+<td>更新输入、返回和继续时不丢最新文本，不使用过期结果；需专项确认</td>
+</tr>
+<tr class="even">
+<td>错误恢复</td>
+<td>API、文件解析失败有可理解反馈；不将局部失败描述为完成</td>
+</tr>
+</tbody>
+</table>
+<h2 id="已有验证证据">9.2 已有验证证据</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>记录</th>
+<th>已确认结果</th>
+<th>不代表什么</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>当前离线回归</td>
+<td>6 项测试通过：输出分离、提示词边界、页面 /
+下载，以及英文提示与导航等</td>
+<td>不等于所有交互和异常均被覆盖</td>
+</tr>
+<tr class="even">
+<td>中文真实样例</td>
+<td>内置经历＋数据分析实习 JD
+跑通分析与生成；修复建议混入正文后复测通过</td>
+<td>没有完成真人追问验收；曾发现部分时间信息丢失</td>
+</tr>
+<tr class="odd">
+<td>英文真实样例</td>
+<td>8 次模型调用及真实检索；3
+个候选追问；模拟回答审查、正文与建议生成通过</td>
+<td>不是 3 位用户或 3 轮真人测试，也不是大规模效果结论</td>
+</tr>
+<tr class="even">
+<td>英文页面与导出</td>
+<td>实际结果填充五个页面，英文文案、Markdown 与 Word
+输出检查通过；内部服务健康检查通过</td>
+<td>不等于线上部署及外部访问验收</td>
+</tr>
+<tr class="odd">
+<td>既往试用</td>
+<td>面试材料中作者自述约 15 人体验、约 3 人持续使用</td>
+<td>不是具有统一时间窗和埋点定义的 20% 留存率</td>
+</tr>
+</tbody>
+</table>
+<h2 id="后续测量口径">9.3 后续测量口径</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>指标</th>
+<th>定义</th>
+<th>当前状态</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>流程完成率</td>
+<td>测试期内生成正文的有效会话 / 已提交有效输入的会话</td>
+<td>待建立会话及事件口径，暂无基线</td>
+</tr>
+<tr class="even">
+<td>等待时间</td>
+<td>分别记录首次匹配完成、提交回答完成、最终生成的耗时</td>
+<td>有单次观察，无可靠 p50 / p95</td>
+</tr>
+<tr class="odd">
+<td>事实错误</td>
+<td>在人工核对样本中分别统计编造、跨经历错挂及关键事实遗漏</td>
+<td>尚无成体系标注集</td>
+</tr>
+<tr class="even">
+<td>追问价值</td>
+<td>有效新增事实的回答数 / 已提交回答数，并结合用户评价</td>
+<td>模拟调用不能替代真实用户结果</td>
+</tr>
+<tr class="odd">
+<td>采用情况</td>
+<td>用户是否导出、是否修改后使用、是否再次为另一 JD 使用</td>
+<td>待试用反馈与合规测量</td>
+</tr>
+</tbody>
+</table>
+<p>v0.3 提出的同一输入运行 3 次、分数极差不超过 5
+个百分点、等级不跨超过一个相邻等级、强项与缺口重合率至少
+60%，继续作为候选稳定性验收目标，<strong>尚未据本轮测试验收</strong>。正式测量时需固定模型、提示词和配置，明确重合率的匹配口径。</p>
+<h1 id="发布已知问题与后续安排">10. 发布、已知问题与后续安排</h1>
+<h2 id="发布基线">10.1 发布基线</h2>
+<ul>
+<li>原中文版本位于 <code>main</code>；本轮共享语言能力及输出分离在
+<code>english-app</code>，提交 <code>138ed53</code>，未合入 main。</li>
+<li>英文应用使用 <code>ui/app_en.py</code>，与中文入口分别部署；Key
+在对应托管应用中独立配置，不提交仓库。</li>
+<li>此文档所列测试针对开发环境中的代码。线上发布需确认分支、入口、Key、实际调用、文件下载及真实浏览器体验。</li>
+<li>出现回归时回退到已验证代码提交，并确认相关提示词同步回退；不只回退页面文件。</li>
+</ul>
+<h2 id="当前重点问题">10.2 当前重点问题</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>问题</th>
+<th>处理方向</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>已知日期在生成中变成“时间未详”</td>
+<td>检查记录解析、chunk / atom
+元数据与最终上下文传递；独立修复并测试</td>
+</tr>
+<tr class="even">
+<td>v0.3 编辑同步记录与当前实现不一致</td>
+<td>用真实浏览器验证最新文本的提交、导航及旧分析清理</td>
+</tr>
+<tr class="odd">
+<td>网页与 CLI 追问能力不同</td>
+<td>以网页实际行为描述产品，迁移动态追问前单独立项</td>
+</tr>
+<tr class="even">
+<td>当前无长期资料管理、断点恢复或成熟监控</td>
+<td>结合真实使用频率及失败情况确定优先级，不为框架名称扩架构</td>
+</tr>
+</tbody>
+</table>
+<h2 id="下一轮立项原则">10.3 下一轮立项原则</h2>
+<p>先收集能影响完整使用、事实信任和交付质量的反馈，再选定一轮有明确目标的改动。换云平台、引入
+Agent
+框架或扩大推广均是候选方案，不列为已承诺功能。每轮补充需求编号、验收场景、代码提交与实际效果，即可在本文件持续维护。</p>
+<h1 id="附录-a材料与证据索引">附录 A：材料与证据索引</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>来源</th>
+<th>在本文件中的用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cari_agent_prd_v_0_1.md</code></td>
+<td>确认旧版已废弃；正文缺失，不据此还原具体第一版功能</td>
+</tr>
+<tr class="even">
+<td><code>cari_agent_prd_v_0_2.md</code></td>
+<td>本地 MVP、RAG、证据边界、范围与当时待办</td>
+</tr>
+<tr class="odd">
+<td><code>CariAgent_PRD_Portfolio_v0_3.pdf</code></td>
+<td>网页阶段、评分、交互记录、稳定性目标与作品集说明</td>
+</tr>
+<tr class="even">
+<td><code>CariAgent研发日志.docx</code>（含截图）</td>
+<td>2026-05-08 构想、追问自测、评分探索、RAG 动机及暂缓方向</td>
+</tr>
+<tr class="odd">
+<td><code>cari_agent_rag_development_log.md</code></td>
+<td>Query 粒度、section、provenance、Step 4 等关键纠偏</td>
+</tr>
+<tr class="even">
+<td><code>workflow_design_notes.md</code></td>
+<td>统一状态、分步职责、原文优先、CLI 阈值及上下文取舍</td>
+</tr>
+<tr class="odd">
+<td>当前仓库、Git 记录与本轮测试产物</td>
+<td>核实现行行为、中英文改动、测试结果及尚未覆盖的范围</td>
+</tr>
+<tr class="even">
+<td>作者提供的面试记录及本轮对话</td>
+<td>试用反馈、英文版目标与当前部署状态的自述；与运行证据分开</td>
+</tr>
+</tbody>
+</table>
+<p>编排参考了 Microsoft PowerToys 的公开规格评审流程与 SCOOBE
+功能规格：按问题、目标、优先级、行为、测量和原型组织，关联研发验证。未采用任何公开模板中的虚构目标值作为本项目成果。</p>
+<ul>
+<li><a href="https://github.com/microsoft/PowerToys/blob/main/doc/specs/readme.md">PowerToys
+规格评审流程</a></li>
+<li><a href="https://github.com/microsoft/PowerToys/blob/main/doc/specs/SCOOBE.md">PowerToys
+SCOOBE 功能规格</a></li>
+</ul>
+<p>用户推荐的两篇人人都是产品经理文章尚未成功读取，未将其内容列为已核实依据。</p>
+<h1 id="附录-b文档维护规则">附录 B：文档维护规则</h1>
+<p>需求改动更新第 5 章；重大方案取舍更新第 8 章；实测和发布更新第 9–10
+章。保留“观察、决定、实现、验证”的区别，不追写不存在的研发日期、团队评审或效果数字。</p>
+<p>流程图源文件为
+<code>assets/user-flow.dot</code>、<code>assets/system-flow.dot</code>，与对应
+SVG 一同维护。Markdown 为主维护文件，网页与 PDF
+由同一源文件导出，避免多个版本各自修改。</p>
+</body>
+</html>
